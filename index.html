@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/png" href="favicon.png">
 <title>Validação DRE</title>
+<link rel="icon" type="image/png" href="favicon.png">
 
 <style>
 *{box-sizing:border-box}
@@ -631,6 +631,14 @@ tr:hover td{
     }
 
 }
+
+/* LOGIN SUPABASE */
+.loginback{position:fixed;inset:0;background:rgba(4,26,47,.84);display:flex;align-items:center;justify-content:center;z-index:20000;padding:20px}
+.loginback.hidden{display:none!important}
+.loginbox{width:min(420px,100%);background:#fff;border-radius:14px;box-shadow:0 20px 70px rgba(0,0,0,.35);overflow:hidden}
+.loginhead{background:#0b3553;color:#fff;padding:22px;text-align:center}
+.loginhead strong{display:block;font-size:24px;letter-spacing:2px}.loginhead span{font-size:11px}
+.loginbody{padding:22px}.loginbody label{display:block;font-size:11px;font-weight:700;color:#475467;margin-bottom:6px}.loginbody input{width:100%;padding:10px;border:1px solid #c6d2dc;border-radius:7px;margin-bottom:12px}.loginmsg{min-height:18px;color:#b42318;font-size:11px;margin-bottom:6px}.logout-btn{margin-left:6px;background:#fff;border:1px solid #6e899c;color:#344054;border-radius:6px;height:32px;padding:0 10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 
@@ -666,8 +674,26 @@ tr:hover td{
         <button class="top-clear" onclick="limpar()">Limpar filtros</button>
     </div>
 
-    <button class="btn primary" onclick="nova()">＋ Nova Validação</button>
+    <div style="display:flex;align-items:center;gap:6px"><button class="btn primary" onclick="nova()">＋ Nova Validação</button><button class="logout-btn" onclick="logout()">Sair</button></div>
 </header>
+
+
+<div class="loginback" id="loginScreen">
+  <div class="loginbox">
+    <div class="loginhead">
+      <strong>GSD</strong>
+      <span>Grupo São Domingo • Validação DRE</span>
+    </div>
+    <div class="loginbody">
+      <label for="loginEmail">E-mail</label>
+      <input id="loginEmail" type="email" autocomplete="username" placeholder="seu e-mail profissional">
+      <label for="loginPassword">Senha</label>
+      <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Sua senha">
+      <div class="loginmsg" id="loginMsg"></div>
+      <button class="btn primary" id="loginBtn" style="width:100%" onclick="login()">Entrar</button>
+    </div>
+  </div>
+</div>
 
 <main class="container">
 
@@ -849,1255 +875,153 @@ tr:hover td{
 <div class="toast" id="toast"></div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL='https://jmhzzqpabcqtrvgcxvua.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_4PNduM7AGcnSoz8iw4takA__VKdfesK';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
-let D={
-    registros:[],
-    postos:[],
-    status:[],
-    tipos:[]
-},
-mes='';
-
-let ordenacao={
-    campo:null,
-    direcao:1
-};
+let D={registros:[],postos:[],status:[],tipos:[]},mes='';
+let ordenacao={campo:null,direcao:1};
 
 const $=id=>document.getElementById(id);
+const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),months=$('months'),report=$('report'),body=$('body'),count=$('count');
+const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
 
-const fc=$('fc'),
-      fs=$('fs'),
-      ft=$('ft'),
-      fb=$('fb'),
-      months=$('months'),
-      report=$('report'),
-      body=$('body'),
-      count=$('count');
+const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','AGUARDANDO RETORNO','VALIDADO','AJUSTADO','REGISTRADO'];
+const TIPOS_LIST=['Validação','Observação','Ajuste'];
 
-const modal=$('modal'),
-      form=$('form'),
-      mtitle=$('mtitle'),
-      picker=$('picker'),
-      selected=$('selected'),
-      id=$('id'),
-      comp=$('comp'),
-      conta=$('conta'),
-      tipo=$('tipo'),
-      status=$('status'),
-      obs=$('obs'),
-      valor=$('valor'),
-      resultado=$('resultado'),
-      save=$('save'),
-      toast=$('toast');
+window.addEventListener('DOMContentLoaded',async()=>{
+  const {data}=await sb.auth.getSession();
+  if(data.session){await iniciarSistema();}else{mostrarLogin();}
+  sb.auth.onAuthStateChange(async(event,session)=>{
+    if(session){await iniciarSistema();}else{mostrarLogin();}
+  });
+});
 
+function mostrarLogin(){
+  $('loginScreen').classList.remove('hidden');
+  setTimeout(()=>$('loginEmail').focus(),50);
+}
+function esconderLogin(){ $('loginScreen').classList.add('hidden'); }
+async function login(){
+  const btn=$('loginBtn'), msg=$('loginMsg');
+  const email=$('loginEmail').value.trim(), password=$('loginPassword').value;
+  if(!email||!password){msg.textContent='Informe e-mail e senha.';return;}
+  btn.disabled=true;btn.textContent='Entrando...';msg.textContent='';
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(error){msg.textContent=error.message||'Não foi possível entrar.';btn.disabled=false;btn.textContent='Entrar';return;}
+  btn.disabled=false;btn.textContent='Entrar';
+}
+async function logout(){await sb.auth.signOut();}
 
-google.script.run
-    .withSuccessHandler(init)
-    .withFailureHandler(e=>erro(e,'Não foi possível carregar o sistema.'))
-    .carregarDados();
-
-
-function init(x){
-    D=x||D;
-    opcoes();
-    postos();
-    competencias();
-    render();
+async function iniciarSistema(){
+  esconderLogin();
+  D={registros:[],postos:[],status:STATUS_LIST.slice(),tipos:TIPOS_LIST.slice()};
+  try{
+    const {data:postosData,error:postosError}=await sb.from('postos').select('id,nome,categoria,ativo').eq('ativo',true).order('categoria').order('nome');
+    if(postosError) throw postosError;
+    D.postos=(postosData||[]).map(x=>x.nome);
+    await carregarDados();
+    opcoes();postos();competencias();render();
+  }catch(e){erro(e,'Não foi possível carregar o sistema.');}
 }
 
+async function carregarDados(){
+  const {data,error}=await sb.from('validacoes').select('id,competencia,conta_dre,tipo,observacao,valor_envolvido,resultado,status,criado_em,atualizado_em,validacao_postos(posto_id,postos(nome))').order('atualizado_em',{ascending:false});
+  if(error) throw error;
+  D.registros=(data||[]).map(r=>({
+    id:r.id,competencia:r.competencia||'',conta:r.conta_dre||'',tipo:r.tipo||'Validação',observacao:r.observacao||'',valor:r.valor_envolvido==null?'':String(r.valor_envolvido),resultado:r.resultado||'',status:r.status||'PENDENTE',criadoEm:formatarDataSupabase(r.criado_em),atualizadoEm:formatarDataSupabase(r.atualizado_em),
+    posto:(r.validacao_postos||[]).map(v=>v.postos?.nome).filter(Boolean).join(' / ')
+  }));
+}
+
+function formatarDataSupabase(v){if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 
 function opcoes(){
-
-    const statusFiltroAtual=fs.value;
-    const tipoFiltroAtual=ft.value;
-    const statusAtual=status.value;
-    const tipoAtual=tipo.value;
-
-    fc.innerHTML='';
-
-    fs.innerHTML='<option value="">Todos</option>';
-
-    ft.innerHTML='<option value="">Todos</option>';
-
-    status.innerHTML='';
-
-    tipo.innerHTML='';
-
-
-    D.status.forEach(s=>{
-
-        fs.insertAdjacentHTML(
-            'beforeend',
-            `<option value="${e(s)}">${e(s)}</option>`
-        );
-
-        status.insertAdjacentHTML(
-            'beforeend',
-            `<option value="${e(s)}">${e(s)}</option>`
-        );
-
-    });
-
-
-    D.tipos.forEach(t=>{
-
-        ft.insertAdjacentHTML(
-            'beforeend',
-            `<option value="${e(t)}">${e(t)}</option>`
-        );
-
-        tipo.insertAdjacentHTML(
-            'beforeend',
-            `<option value="${e(t)}">${e(t)}</option>`
-        );
-
-    });
-
-
-    if([...fs.options].some(o=>o.value===statusFiltroAtual))
-        fs.value=statusFiltroAtual;
-
-    if([...ft.options].some(o=>o.value===tipoFiltroAtual))
-        ft.value=tipoFiltroAtual;
-
-    if([...status.options].some(o=>o.value===statusAtual))
-        status.value=statusAtual;
-
-    if([...tipo.options].some(o=>o.value===tipoAtual))
-        tipo.value=tipoAtual;
-
+  const statusFiltroAtual=fs.value,tipoFiltroAtual=ft.value,statusAtual=status.value,tipoAtual=tipo.value;
+  fc.innerHTML='';fs.innerHTML='<option value="">Todos</option>';ft.innerHTML='<option value="">Todos</option>';status.innerHTML='';tipo.innerHTML='';
+  D.status.forEach(s=>{fs.insertAdjacentHTML('beforeend',`<option value="${e(s)}">${e(s)}</option>`);status.insertAdjacentHTML('beforeend',`<option value="${e(s)}">${e(s)}</option>`);});
+  D.tipos.forEach(t=>{ft.insertAdjacentHTML('beforeend',`<option value="${e(t)}">${e(t)}</option>`);tipo.insertAdjacentHTML('beforeend',`<option value="${e(t)}">${e(t)}</option>`);});
+  if([...fs.options].some(o=>o.value===statusFiltroAtual))fs.value=statusFiltroAtual;
+  if([...ft.options].some(o=>o.value===tipoFiltroAtual))ft.value=tipoFiltroAtual;
+  if([...status.options].some(o=>o.value===statusAtual))status.value=statusAtual;
+  if([...tipo.options].some(o=>o.value===tipoAtual))tipo.value=tipoAtual;
 }
-
-
-function postos(){
-
-    picker.innerHTML=D.postos
-        .map(p=>`
-            <label>
-                <input
-                    type="checkbox"
-                    value="${ea(p)}"
-                    onchange="selPostos()">
-                ${e(p)}
-            </label>
-        `)
-        .join('');
-
-}
-
-function selecionarTodosPostos(){
-
-    picker
-        .querySelectorAll('input')
-        .forEach(x=>x.checked=true);
-
-    selPostos();
-
-}
-
-
-function limparPostos(){
-
-    picker
-        .querySelectorAll('input')
-        .forEach(x=>x.checked=false);
-
-    selPostos();
-
-}
-
-
-function competencias(){
-
-    let a=[
-        ...new Set(
-            D.registros
-                .map(r=>r.competencia)
-                .filter(Boolean)
-        )
-    ]
-    .sort()
-    .reverse();
-
-
-    if(!a.length){
-
-        let d=new Date();
-
-        a=[
-            d.getFullYear()+
-            '-'+
-            String(d.getMonth()+1).padStart(2,'0')
-        ];
-
-    }
-
-
-    if(!mes||!a.includes(mes))
-        mes=a[0];
-
-
-    fc.innerHTML=a
-        .map(x=>`
-            <option value="${ea(x)}">
-                ${e(fmt(x))}
-            </option>
-        `)
-        .join('');
-
-
-    fc.value=mes;
-
-
-    months.innerHTML=a
-        .map(x=>`
-            <button
-                class="month ${x==mes?'active':''}"
-                onclick="mes='${ej(x)}';competencias();render()">
-                ${e(fmt(x))}
-            </button>
-        `)
-        .join('');
-
-}
-
+function postos(){picker.innerHTML=D.postos.map(p=>`<label><input type="checkbox" value="${ea(p)}" onchange="selPostos()"> ${e(p)}</label>`).join('');}
+function selecionarTodosPostos(){picker.querySelectorAll('input').forEach(x=>x.checked=true);selPostos();}
+function limparPostos(){picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
+function competencias(){let a=[...new Set(D.registros.map(r=>r.competencia).filter(Boolean))].sort().reverse();if(!a.length)a=[novoMes()];if(!mes||!a.includes(mes))mes=a[0];fc.innerHTML=a.map(x=>`<option value="${ea(x)}">${e(fmt(x))}</option>`).join('');fc.value=mes;months.innerHTML=a.map(x=>`<button class="month ${x==mes?'active':''}" onclick="mes='${ej(x)}';competencias();render()">${e(fmt(x))}</button>`).join('');}
 
 function render(){
-
-    mes=fc.value||mes;
-
-    let a=D.registros
-        .filter(r=>r.competencia===mes);
-
-
-    if(fs.value)
-        a=a.filter(r=>r.status===fs.value);
-
-
-    if(ft.value)
-        a=a.filter(r=>r.tipo===ft.value);
-
-
-    let q=fb.value.toLowerCase().trim();
-
-
-    if(q)
-
-        a=a.filter(r=>
-            [
-                r.conta,
-                r.posto,
-                r.tipo,
-                r.obs,
-                r.observacao,
-                r.resultado,
-                r.status,
-                r.responsavel
-            ]
-            .join(' ')
-            .toLowerCase()
-            .includes(q)
-        );
-
-
-    if(ordenacao.campo){
-
-        a.sort(
-            (x,y)=>
-                compararRegistros(
-                    x,
-                    y,
-                    ordenacao.campo
-                ) * ordenacao.direcao
-        );
-
-    }
-
-
-    atualizarIndicadoresOrdenacao();
-
-
-    relatorio();
-
-    body.innerHTML='';
-
-    count.textContent=a.length+' registro(s)';
-
-
-    if(!a.length){
-
-        body.innerHTML=`
-            <tr>
-                <td colspan="8">
-                    <div class="empty">
-                        Nenhuma validação encontrada.
-                    </div>
-                </td>
-            </tr>
-        `;
-
-        return;
-
-    }
-
-
-    a.forEach(r=>{
-
-        let tr=document.createElement('tr');
-
-        let cl=
-            r.tipo==='Observação'
-            ?'bo'
-            :r.tipo==='Ajuste'
-            ?'ba'
-            :'bv';
-
-
-        tr.innerHTML=`
-
-            <td>${e(r.competencia)}</td>
-
-            <td>
-                <b>${e(r.conta)}</b>
-            </td>
-
-            <td>${e(r.posto)}</td>
-
-            <td>
-                <span class="badge ${cl}">
-                    ${e(r.tipo)}
-                </span>
-            </td>
-
-            <td>
-                ${e(r.observacao||'-')}
-            </td>
-
-            <td>
-
-                <select
-                    class="status status-${r.status.replace(/ /g,'-')}"
-                    onchange="
-                        st('${ej(r.id)}',this.value);
-                        this.className='status status-'+this.value.replace(/ /g,'-')
-                    ">
-
-                    ${D.status
-                        .map(s=>`
-                            <option
-                                value="${e(s)}"
-                                ${s===r.status?'selected':''}>
-                                ${e(s)}
-                            </option>
-                        `)
-                        .join('')
-                    }
-
-                </select>
-
-            </td>
-
-            <td>
-                ${e(r.atualizadoEm||'-')}
-            </td>
-
-            <td>
-
-                <div class="actions">
-
-                    <button
-                        class="small"
-                        onclick="editar('${ej(r.id)}')">
-                        Editar
-                    </button>
-
-                    <button
-                        class="small danger"
-                        onclick="del('${ej(r.id)}')">
-                        Excluir
-                    </button>
-
-                </div>
-
-            </td>
-        `;
-
-        body.appendChild(tr);
-
-    });
-
+  mes=fc.value||mes;let a=D.registros.filter(r=>r.competencia===mes);
+  if(fs.value)a=a.filter(r=>r.status===fs.value);if(ft.value)a=a.filter(r=>r.tipo===ft.value);let q=fb.value.toLowerCase().trim();
+  if(q)a=a.filter(r=>[r.conta,r.posto,r.tipo,r.observacao,r.resultado,r.status].join(' ').toLowerCase().includes(q));
+  if(ordenacao.campo)a.sort((x,y)=>compararRegistros(x,y,ordenacao.campo)*ordenacao.direcao);
+  atualizarIndicadoresOrdenacao();relatorio();body.innerHTML='';count.textContent=a.length+' registro(s)';
+  if(!a.length){body.innerHTML='<tr><td colspan="8"><div class="empty">Nenhuma validação encontrada.</div></td></tr>';return;}
+  a.forEach(r=>{let tr=document.createElement('tr');let cl=r.tipo==='Observação'?'bo':r.tipo==='Ajuste'?'ba':'bv';tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${e(r.observacao||'-')}</td><td><select class="status status-${r.status.replace(/ /g,'-')}" onchange="st('${ej(r.id)}',this.value);this.className='status status-'+this.value.replace(/ /g,'-')">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions"><button class="small" onclick="editar('${ej(r.id)}')">Editar</button><button class="small danger" onclick="del('${ej(r.id)}')">Excluir</button></div></td>`;body.appendChild(tr);});
 }
+function ordenarPor(campo){if(ordenacao.campo===campo)ordenacao.direcao*=-1;else{ordenacao.campo=campo;ordenacao.direcao=1;}render();}
+function compararRegistros(a,b,campo){const va=a[campo]??'',vb=b[campo]??'';if(campo==='atualizadoEm')return converterDataParaNumero(va)-converterDataParaNumero(vb);return String(va).localeCompare(String(vb),'pt-BR',{numeric:true,sensitivity:'base'});}
+function converterDataParaNumero(valor){const partes=String(valor||'').match(/(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?/);if(!partes)return 0;return new Date(Number(partes[3]),Number(partes[2])-1,Number(partes[1]),Number(partes[4]||0),Number(partes[5]||0)).getTime();}
+function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','observacao','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
+function normalizarValorParaInput(valor){if(valor===null||valor===undefined||valor==='')return '';let n=Number(String(valor).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:'';}
+function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],['VALIDADO',z.VALIDADO],['AJUSTADO',z.AJUSTADO]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div><div style="padding:0 14px 14px;text-align:right"><button class="btn secondary" onclick="exp('pdf')">Exportar PDF</button><button class="btn secondary" onclick="exp('excel')">Exportar Excel</button><button class="btn secondary" onclick="imprimir()">Imprimir</button></div></div>`;}
+function nova(){limparForm();comp.value=mes||novoMes();status.value='PENDENTE';mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
+function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;conta.value=r.conta;tipo.value=r.tipo;obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
+function selPostos(){let a=[...picker.querySelectorAll('input:checked')].map(x=>x.value);selected.textContent=a.length?a.join(' / '):'Nenhum posto selecionado.';}
+function limparForm(){form.reset();id.value='';picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
 
-
-function ordenarPor(campo){
-
-    if(ordenacao.campo===campo){
-
-        ordenacao.direcao*=-1;
-
+async function salvar(ev){
+  ev.preventDefault();
+  const ps=[...picker.querySelectorAll('input:checked')].map(x=>x.value);
+  if(!ps.length)return erro(null,'Selecione pelo menos um posto.');
+  if(!conta.value.trim())return erro(null,'Informe a conta DRE.');
+  const valorNumero=valor.value===''?null:Number(valor.value);
+  if(valor.value!==''&&!Number.isFinite(valorNumero))return erro(null,'Informe um valor válido.');
+  const dados={id:id.value,competencia:comp.value,conta:conta.value.trim(),tipo:tipo.value,observacao:obs.value.trim(),valor_envolvido:valorNumero,resultado:resultado.value.trim(),status:status.value};
+  save.disabled=true;save.textContent='Salvando...';
+  try{
+    let validacaoId=dados.id;
+    if(validacaoId){
+      const {error}=await sb.from('validacoes').update({competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status}).eq('id',validacaoId);
+      if(error)throw error;
+      const {data:postosData,error:pErr}=await sb.from('postos').select('id,nome').in('nome',ps);if(pErr)throw pErr;
+      const {error:dErr}=await sb.from('validacao_postos').delete().eq('validacao_id',validacaoId);if(dErr)throw dErr;
+      if(postosData?.length){const {error:iErr}=await sb.from('validacao_postos').insert(postosData.map(p=>({validacao_id:validacaoId,posto_id:p.id})));if(iErr)throw iErr;}
     }else{
-
-        ordenacao.campo=campo;
-        ordenacao.direcao=1;
-
+      const {data:v,error}=await sb.from('validacoes').insert({competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status}).select('id').single();
+      if(error)throw error;validacaoId=v.id;
+      const {data:postosData,error:pErr}=await sb.from('postos').select('id,nome').in('nome',ps);if(pErr)throw pErr;
+      if(postosData?.length){const {error:iErr}=await sb.from('validacao_postos').insert(postosData.map(p=>({validacao_id:validacaoId,posto_id:p.id})));if(iErr)throw iErr;}
     }
-
-    render();
-
+    await carregarDados();competencias();render();fechar();sucesso(dados.id?'Validação atualizada com sucesso.':'Nova validação salva com sucesso.');
+  }catch(x){erro(x,'Não foi possível salvar a validação.');}
+  save.disabled=false;save.textContent='Salvar Registro';
 }
 
-
-function compararRegistros(a,b,campo){
-
-    let va=a[campo]??'';
-    let vb=b[campo]??'';
-
-    if(campo==='atualizadoEm'){
-
-        return converterDataParaNumero(va)-
-               converterDataParaNumero(vb);
-
-    }
-
-    return String(va).localeCompare(
-        String(vb),
-        'pt-BR',
-        {
-            numeric:true,
-            sensitivity:'base'
-        }
-    );
-
+async function st(id,novoStatus){
+  const {error}=await sb.from('validacoes').update({status:novoStatus}).eq('id',id);
+  if(error){erro(error,'Não foi possível alterar o status.');return;}
+  await carregarDados();competencias();render();sucesso('Status atualizado.');
 }
-
-
-function converterDataParaNumero(valor){
-
-    const partes=String(valor||'')
-        .match(/(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?/);
-
-    if(!partes){
-        return 0;
-    }
-
-    return new Date(
-        Number(partes[3]),
-        Number(partes[2])-1,
-        Number(partes[1]),
-        Number(partes[4]||0),
-        Number(partes[5]||0)
-    ).getTime();
-
-}
-
-
-function atualizarIndicadoresOrdenacao(){
-
-    [
-        'competencia',
-        'conta',
-        'posto',
-        'tipo',
-        'observacao',
-        'status',
-        'atualizadoEm'
-    ].forEach(campo=>{
-
-        const alvo=$('sort-'+campo);
-
-        if(!alvo){
-            return;
-        }
-
-        alvo.textContent=
-            ordenacao.campo===campo
-            ?(
-                ordenacao.direcao===1
-                ?'▲'
-                :'▼'
-            )
-            :'';
-
-    });
-
-}
-
-
-function normalizarValorParaInput(valor){
-
-    if(
-        valor===null ||
-        valor===undefined ||
-        valor===''
-    ){
-        return '';
-    }
-
-    let texto=String(valor).trim();
-
-    texto=texto
-        .replace(/R\$/gi,'')
-        .replace(/\s/g,'')
-        .replace(/\./g,'')
-        .replace(',','.');
-
-    const numero=Number(texto);
-
-    return Number.isFinite(numero)
-        ?numero
-        :'';
-
-}
-
-
-function relatorio(){
-
-    let a=D.registros
-        .filter(r=>r.competencia===mes);
-
-    let z={};
-
-    D.status.forEach(s=>z[s]=0);
-
-    a.forEach(r=>z[r.status]++);
-
-
-    report.innerHTML=`
-
-        <div class="panel">
-
-            <div class="ptitle">
-
-                <span>
-                    Relatório de Validação DRE — ${e(fmt(mes))}
-                </span>
-
-                <span>
-                    ${a.length} registro(s)
-                </span>
-
-            </div>
-
-
-            <div class="cards">
-
-                ${
-                    [
-                        ['TOTAL',a.length],
-                        ['PENDENTE',z.PENDENTE],
-                        ['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],
-                        ['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],
-                        ['VALIDADO',z.VALIDADO],
-                        ['AJUSTADO',z.AJUSTADO]
-                    ]
-                    .map(x=>`
-                        <div class="card">
-                            <strong>${x[1]}</strong>
-                            <span>${e(x[0])}</span>
-                        </div>
-                    `)
-                    .join('')
-                }
-
-            </div>
-
-
-            <div style="padding:0 14px 14px;text-align:right">
-
-                <button
-                    class="btn secondary"
-                    onclick="exp('pdf')">
-                    Exportar PDF
-                </button>
-
-                <button
-                    class="btn secondary"
-                    onclick="exp('excel')">
-                    Exportar Excel
-                </button>
-
-                <button
-                    class="btn secondary"
-                    onclick="imprimir()">
-                    Imprimir
-                </button>
-
-            </div>
-
-        </div>
-    `;
-
-}
-
-
-function nova(){
-
-    limparForm();
-
-    comp.value=mes||novoMes();
-
-    status.value='PENDENTE';
-
-    mtitle.textContent='Criar Nova Validação';
-
-    modal.classList.remove('hidden');
-
-}
-
-
-function editar(id){
-
-    let r=D.registros.find(x=>x.id==id);
-
-    if(!r)return;
-
-
-    limparForm();
-
-    document.getElementById('id').value=r.id;
-
-    comp.value=r.competencia;
-
-    conta.value=r.conta;
-
-    tipo.value=r.tipo;
-
-    obs.value=r.observacao;
-
-    valor.value=normalizarValorParaInput(r.valor);
-
-    resultado.value=r.resultado;
-
-    status.value=r.status;
-
-
-    picker
-        .querySelectorAll('input')
-        .forEach(x=>
-            x.checked=
-            r.posto
-                .split(/\s*\/\s*/)
-                .includes(x.value)
-        );
-
-
-    selPostos();
-
-    mtitle.textContent='Editar Validação';
-
-    modal.classList.remove('hidden');
-
-}
-
-
-function selPostos(){
-
-    let a=[
-        ...picker.querySelectorAll('input:checked')
-    ]
-    .map(x=>x.value);
-
-
-    selected.textContent=
-        a.length
-        ?a.join(' / ')
-        :'Nenhum posto selecionado.';
-
-}
-
-
-function limparForm(){
-
-    form.reset();
-
-    id.value='';
-
-    picker
-        .querySelectorAll('input')
-        .forEach(x=>x.checked=false);
-
-    selPostos();
-
-}
-
-
-function salvar(ev){
-
-    ev.preventDefault();
-
-
-    let ps=[
-        ...picker.querySelectorAll('input:checked')
-    ]
-    .map(x=>x.value);
-
-
-    let d={
-        id:id.value,
-        competencia:comp.value,
-        postos:ps,
-        conta:conta.value,
-        tipo:tipo.value,
-        observacao:obs.value,
-        valor:valor.value,
-        resultado:resultado.value,
-        status:status.value
-    };
-
-
-    if(!ps.length)
-        return erro(null,'Selecione pelo menos um posto.');
-
-
-    let b=save;
-
-    b.disabled=true;
-
-    b.textContent='Salvando...';
-
-
-    let ok=x=>{
-
-        b.disabled=false;
-
-        b.textContent='Salvar Registro';
-
-        D=x;
-
-        fechar();
-
-        competencias();
-
-        render();
-
-        sucesso(
-            d.id
-            ?'Validação atualizada com sucesso.'
-            :'Nova validação salva com sucesso.'
-        );
-
-    };
-
-
-    let bad=x=>{
-
-        b.disabled=false;
-
-        b.textContent='Salvar Registro';
-
-        erro(
-            x,
-            'Não foi possível salvar a validação.'
-        );
-
-    };
-
-
-    let r=
-        google.script.run
-            .withSuccessHandler(ok)
-            .withFailureHandler(bad);
-
-
-    d.id
-        ?r.atualizarValidacao(d)
-        :r.criarValidacao(d);
-
-}
-
-
-function st(id,s){
-
-    google.script.run
-        .withSuccessHandler(x=>{
-
-            D=x;
-
-            competencias();
-
-            render();
-
-            sucesso('Status atualizado.');
-
-        })
-        .withFailureHandler(x=>
-            erro(
-                x,
-                'Não foi possível alterar o status.'
-            )
-        )
-        .alterarStatus(id,s);
-
-}
-
-
-function del(id){
-
-    let r=D.registros.find(x=>x.id==id);
-
-
-    if(
-        r &&
-        confirm(
-            'Deseja realmente excluir esta validação?\n\n' +
-            'Conta: '+r.conta+'\n' +
-            'Posto(s): '+r.posto
-        )
-    )
-
-        google.script.run
-            .withSuccessHandler(x=>{
-
-                D=x;
-
-                competencias();
-
-                render();
-
-                sucesso('Validação excluída.');
-
-            })
-            .withFailureHandler(x=>
-                erro(
-                    x,
-                    'Não foi possível excluir.'
-                )
-            )
-            .excluirValidacao(id);
-
-}
-
-
-function fechar(){
-
-    modal.classList.add('hidden');
-
-}
-
-
-function limpar(){
-
-    fs.value='';
-
-    ft.value='';
-
-    fb.value='';
-
-    render();
-
-}
-
-
-function exp(t){
-
-    let a=D.registros
-        .filter(r=>r.competencia===mes);
-
-
-    if(!a.length)
-        return erro(
-            null,
-            'Não há validações nessa competência.'
-        );
-
-
-    if(t==='pdf')
-        return exportarPdfLocal(a);
-
-
-    exportarExcelLocal(a);
-
-}
-
-
-function exportarPdfLocal(a){
-
-    let w=window.open('','_blank');
-
-    if(!w)
-        return erro(
-            null,
-            'Permita pop-ups para exportar o PDF.'
-        );
-
-
-    let titulo=
-        'Relatório de Validação DRE — '+
-        fmt(mes);
-
-
-    w.document.write(
-        '<!doctype html>' +
-        '<html lang="pt-BR">' +
-        '<head>' +
-        '<meta charset="utf-8">' +
-        '<title>'+e(titulo)+'</title>' +
-
-        '<style>' +
-        'body{font:12px Arial,sans-serif;color:#172033;padding:28px}' +
-        'h1{margin:0 0 4px;font-size:22px}' +
-        'h2{margin:0 0 18px;font-size:16px}' +
-        'p{margin:0 0 16px}' +
-        'table{width:100%;border-collapse:collapse}' +
-        'th,td{border:1px solid #cfd6df;padding:7px;text-align:left;vertical-align:top}' +
-        'th{background:#041a2f;color:#fff}' +
-        '.status{font-weight:700}' +
-        '.pendente{background:#fee2e2}' +
-        '.validado,.ajustado,.registrado{background:#dcfce7}' +
-        '.validacao{background:#dbeafe}' +
-        '.aguardando{background:#ffedd5}' +
-        '</style>' +
-
-        '</head>' +
-
-        '<body>' +
-
-        '<h1>GRUPO SÃO DOMINGO</h1>' +
-
-        '<h2>RELATÓRIO DE VALIDAÇÃO DRE</h2>' +
-
-        '<p>Competência: '+e(fmt(mes))+'</p>' +
-
-        '<table>' +
-
-        '<thead>' +
-
-        '<tr>' +
-        '<th>Conta</th>' +
-        '<th>Posto(s)</th>' +
-        '<th>Tipo</th>' +
-        '<th>O que validar / Observação</th>' +
-        '<th>Resultado</th>' +
-        '<th>Status</th>' +
-        '</tr>' +
-
-        '</thead>' +
-
-        '<tbody>' +
-
-        a.map(r=>
-            '<tr>' +
-            '<td>'+e(r.conta)+'</td>' +
-            '<td>'+e(r.posto)+'</td>' +
-            '<td>'+e(r.tipo)+'</td>' +
-            '<td>'+e(r.observacao)+'</td>' +
-            '<td>'+e(r.resultado)+'</td>' +
-            '<td class="status '+classeStatusImpressao(r.status)+'">'+
-            e(r.status)+
-            '</td>' +
-            '</tr>'
-        ).join('') +
-
-        '</tbody>' +
-
-        '</table>' +
-
-        '</body>' +
-
-        '</html>'
-    );
-
-
-    w.document.close();
-
-    w.focus();
-
-
-    setTimeout(()=>{
-
-        w.print();
-
-        sucesso(
-            'Relatório aberto para salvar como PDF.'
-        );
-
-    },250);
-
-}
-
-
-function classeStatusImpressao(s){
-
-    return s==='PENDENTE'
-        ?'pendente'
-        :s==='VALIDADO'
-        ?'validado'
-        :s==='AJUSTADO'
-        ?'ajustado'
-        :s==='REGISTRADO'
-        ?'registrado'
-        :s==='AGUARDANDO RETORNO'
-        ?'aguardando'
-        :'validacao';
-
-}
-
-
-function exportarExcelLocal(a){
-
-    let rows=a.map(r=>
-        '<tr>' +
-        '<td>'+e(r.competencia)+'</td>' +
-        '<td>'+e(r.conta)+'</td>' +
-        '<td>'+e(r.posto)+'</td>' +
-        '<td>'+e(r.tipo)+'</td>' +
-        '<td>'+e(r.observacao)+'</td>' +
-        '<td>'+e(r.valor)+'</td>' +
-        '<td>'+e(r.resultado)+'</td>' +
-        '<td>'+e(r.status)+'</td>' +
-        '<td>'+e(r.responsavel)+'</td>' +
-        '</tr>'
-    ).join('');
-
-
-    let htmlExcel=
-        '<!doctype html>' +
-        '<html>' +
-        '<head>' +
-        '<meta charset="utf-8">' +
-        '</head>' +
-
-        '<body>' +
-
-        '<h2>GRUPO SÃO DOMINGO — RELATÓRIO DE VALIDAÇÃO DRE</h2>' +
-
-        '<p>Competência: '+e(fmt(mes))+'</p>' +
-
-        '<table border="1">' +
-
-        '<tr>' +
-        '<th>Competência</th>' +
-        '<th>Conta</th>' +
-        '<th>Posto(s)</th>' +
-        '<th>Tipo</th>' +
-        '<th>O que validar / Observação</th>' +
-        '<th>Valor Envolvido</th>' +
-        '<th>Resultado da Validação</th>' +
-        '<th>Status</th>' +
-        '<th>Responsável</th>' +
-        '</tr>' +
-
-        rows +
-
-        '</table>' +
-
-        '</body>' +
-        '</html>';
-
-
-    let blob=new Blob(
-        ['\ufeff',htmlExcel],
-        {
-            type:'application/vnd.ms-excel;charset=utf-8'
-        }
-    );
-
-
-    let url=URL.createObjectURL(blob);
-
-    let aEl=document.createElement('a');
-
-    aEl.href=url;
-
-    aEl.download=
-        'Relatorio_Validacao_DRE_'+
-        mes+
-        '.xls';
-
-    document.body.appendChild(aEl);
-
-    aEl.click();
-
-    aEl.remove();
-
-
-    setTimeout(
-        ()=>URL.revokeObjectURL(url),
-        1000
-    );
-
-
-    sucesso('Arquivo Excel gerado.');
-
-}
-
-
-function imprimir(){
-
-    let a=D.registros
-        .filter(r=>r.competencia===mes);
-
-    let w=window.open('','_blank');
-
-
-    if(!w)
-        return erro(
-            null,
-            'Permita pop-ups para imprimir.'
-        );
-
-
-    w.document.write(
-
-        '<html>' +
-
-        '<head>' +
-
-        '<title>Relatório DRE</title>' +
-
-        '<style>' +
-
-        'body{font:12px Arial;padding:25px}' +
-
-        'table{width:100%;border-collapse:collapse}' +
-
-        'th,td{border:1px solid #ccc;padding:6px;text-align:left}' +
-
-        'th{background:#eee}' +
-
-        '</style>' +
-
-        '</head>' +
-
-        '<body>' +
-
-        '<h1>GRUPO SÃO DOMINGOS</h1>' +
-
-        '<h2>RELATÓRIO DE VALIDAÇÃO DRE</h2>' +
-
-        '<p>Competência: '+e(fmt(mes))+'</p>' +
-
-        '<table>' +
-
-        '<tr>' +
-        '<th>Conta</th>' +
-        '<th>Posto(s)</th>' +
-        '<th>Tipo</th>' +
-        '<th>Observação</th>' +
-        '<th>Resultado</th>' +
-        '<th>Status</th>' +
-        '</tr>' +
-
-        a.map(r=>
-            '<tr>' +
-            '<td>'+e(r.conta)+'</td>' +
-            '<td>'+e(r.posto)+'</td>' +
-            '<td>'+e(r.tipo)+'</td>' +
-            '<td>'+e(r.observacao)+'</td>' +
-            '<td>'+e(r.resultado)+'</td>' +
-            '<td>'+e(r.status)+'</td>' +
-            '</tr>'
-        ).join('') +
-
-        '</table>' +
-
-        '</body>' +
-
-        '</html>'
-    );
-
-
-    w.document.close();
-
-    w.print();
-
-}
-
-
-function fmt(c){
-
-    let p=c.split('-');
-
-    let m=[
-        '',
-        'Janeiro',
-        'Fevereiro',
-        'Março',
-        'Abril',
-        'Maio',
-        'Junho',
-        'Julho',
-        'Agosto',
-        'Setembro',
-        'Outubro',
-        'Novembro',
-        'Dezembro'
-    ];
-
-    return p.length==2
-        ?(m[+p[1]]||p[1])+'/'+p[0]
-        :c;
-
-}
-
-
-function novoMes(){
-
-    let d=new Date();
-
-    return d.getFullYear()+
-        '-'+
-        String(d.getMonth()+1).padStart(2,'0');
-
-}
-
-
-function e(v){
-
-    return String(v??'')
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;')
-        .replace(/"/g,'&quot;')
-        .replace(/'/g,'&#039;');
-
-}
-
-
-function ea(v){
-    return e(v)
-}
-
-
-function ej(v){
-
-    return String(v??'')
-        .replace(/\\/g,'\\\\')
-        .replace(/'/g,"\\'");
-
-}
-
-
-function sucesso(t){
-
-    toast.textContent=t;
-
-    toast.className='toast show';
-
-    setTimeout(
-        ()=>toast.className='toast',
-        3000
-    );
-
-}
-
-
-function erro(x,p){
-
-    toast.textContent=
-        p+
-        (x&&x.message?' '+x.message:'');
-
-    toast.className='toast show error';
-
-    setTimeout(
-        ()=>toast.className='toast',
-        6000
-    );
-
-}
-
+async function del(id){let r=D.registros.find(x=>x.id==id);if(!r)return;if(!confirm('Deseja realmente excluir esta validação?\n\nConta: '+r.conta+'\nPosto(s): '+r.posto))return;const {error}=await sb.from('validacoes').delete().eq('id',id);if(error){erro(error,'Não foi possível excluir.');return;}await carregarDados();competencias();render();sucesso('Validação excluída.');}
+function fechar(){modal.classList.add('hidden');}
+function limpar(){fs.value='';ft.value='';fb.value='';render();}
+
+function exp(t){let a=D.registros.filter(r=>r.competencia===mes);if(!a.length)return erro(null,'Não há validações nessa competência.');if(t==='pdf')return exportarPdfLocal(a);exportarExcelLocal(a);}
+function exportarPdfLocal(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');let titulo='Relatório de Validação DRE — '+fmt(mes);w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(titulo)+'</title><style>body{font:12px Arial,sans-serif;color:#172033;padding:28px}h1{margin:0 0 4px;font-size:22px}h2{margin:0 0 18px;font-size:16px}p{margin:0 0 16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cfd6df;padding:7px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}.status{font-weight:700}.pendente{background:#fee2e2}.validado,.ajustado,.registrado{background:#dcfce7}.validacao{background:#dbeafe}.aguardando{background:#ffedd5}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><thead><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>O que validar / Observação</th><th>Resultado</th><th>Status</th></tr></thead><tbody>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td class="status '+classeStatusImpressao(r.status)+'">'+e(r.status)+'</td></tr>').join('')+'</tbody></table></body></html>');w.document.close();w.focus();setTimeout(()=>{w.print();sucesso('Relatório aberto para salvar como PDF.');},250);}
+function classeStatusImpressao(s){return s==='PENDENTE'?'pendente':s==='VALIDADO'?'validado':s==='AJUSTADO'?'ajustado':s==='REGISTRADO'?'registrado':s==='AGUARDANDO RETORNO'?'aguardando':'validacao';}
+function exportarExcelLocal(a){let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('');let htmlExcel='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>O que validar / Observação</th><th>Valor Envolvido</th><th>Resultado da Validação</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',htmlExcel],{type:'application/vnd.ms-excel;charset=utf-8'});let url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download='Relatorio_Validacao_DRE_'+mes+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Arquivo Excel gerado.');}
+function imprimir(){let a=D.registros.filter(r=>r.competencia===mes),w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para imprimir.');w.document.write('<html><head><title>Relatório DRE</title><style>body{font:12px Arial;padding:25px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left}th{background:#eee}</style></head><body><h1>GRUPO SÃO DOMINGOS</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Observação</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.print();}
+function fmt(c){let p=c.split('-'),m=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];return p.length==2?(m[+p[1]]||p[1])+'/'+p[0]:c;}
+function novoMes(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+function e(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function ea(v){return e(v)}
+function ej(v){return String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function sucesso(t){toast.textContent=t;toast.className='toast show';setTimeout(()=>toast.className='toast',3000);}
+function erro(x,p){toast.textContent=p+(x&&x.message?' '+x.message:'');toast.className='toast show error';setTimeout(()=>toast.className='toast',6000);}
 </script>
 
 </body>
