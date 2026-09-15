@@ -685,8 +685,8 @@ tr:hover td{
       <span>Grupo São Domingo • Validação DRE</span>
     </div>
     <div class="loginbody">
-      <label for="loginEmail">E-mail</label>
-      <input id="loginEmail" type="email" autocomplete="username" placeholder="seu e-mail profissional">
+      <label for="loginUsername">Usuário</label>
+      <input id="loginUsername" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="seu usuário">
       <label for="loginPassword">Senha</label>
       <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Sua senha">
       <div class="loginmsg" id="loginMsg"></div>
@@ -901,17 +901,57 @@ window.addEventListener('DOMContentLoaded',async()=>{
 
 function mostrarLogin(){
   $('loginScreen').classList.remove('hidden');
-  setTimeout(()=>$('loginEmail').focus(),50);
+  setTimeout(()=>$('loginUsername').focus(),50);
 }
 function esconderLogin(){ $('loginScreen').classList.add('hidden'); }
 async function login(){
   const btn=$('loginBtn'), msg=$('loginMsg');
-  const email=$('loginEmail').value.trim(), password=$('loginPassword').value;
-  if(!email||!password){msg.textContent='Informe e-mail e senha.';return;}
-  btn.disabled=true;btn.textContent='Entrando...';msg.textContent='';
-  const {error}=await sb.auth.signInWithPassword({email,password});
-  if(error){msg.textContent=error.message||'Não foi possível entrar.';btn.disabled=false;btn.textContent='Entrar';return;}
-  btn.disabled=false;btn.textContent='Entrar';
+  const username=$('loginUsername').value.trim().toLowerCase();
+  const password=$('loginPassword').value;
+
+  if(!username||!password){
+    msg.textContent='Informe usuário e senha.';
+    return;
+  }
+
+  btn.disabled=true;
+  btn.textContent='Entrando...';
+  msg.textContent='';
+
+  const {data,error}=await sb.functions.invoke('login-username',{
+    body:{username,password}
+  });
+
+  if(error){
+    let mensagem='Usuário ou senha inválidos.';
+    try{
+      const detalhe=await error.context?.json();
+      if(detalhe?.message) mensagem=detalhe.message;
+    }catch(_e){}
+    msg.textContent=mensagem;
+    btn.disabled=false;
+    btn.textContent='Entrar';
+    return;
+  }
+
+  if(!data?.session){
+    msg.textContent='Não foi possível iniciar a sessão.';
+    btn.disabled=false;
+    btn.textContent='Entrar';
+    return;
+  }
+
+  const {error:setSessionError}=await sb.auth.setSession(data.session);
+
+  if(setSessionError){
+    msg.textContent='Não foi possível iniciar a sessão.';
+    btn.disabled=false;
+    btn.textContent='Entrar';
+    return;
+  }
+
+  btn.disabled=false;
+  btn.textContent='Entrar';
 }
 async function logout(){await sb.auth.signOut();}
 
