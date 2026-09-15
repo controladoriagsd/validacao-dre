@@ -354,6 +354,12 @@ tr:hover td{
     border-color:#86efac
 }
 
+.status-VALIDAÇÃO-FINANCEIRO{
+    background:#ede9fe;
+    color:#6d28d9;
+    border-color:#c4b5fd
+}
+
 .actions{
     display:flex;
     gap:5px
@@ -653,6 +659,13 @@ tr:hover td{
 .userlist table{min-width:760px}
 .userlist th,.userlist td{padding:8px}
 .user-actions{display:flex;gap:5px;white-space:nowrap}
+.account-modal{width:min(520px,100%);height:auto;background:#fff;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.account-head{background:#0b3553;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.account-head h2{margin:0;font-size:18px}
+.account-body{padding:16px;background:#edf4f8}
+.account-body input{width:100%;padding:9px;border:1px solid #c6d2dc;border-radius:7px;background:#fff}
+.account-foot{padding:12px 16px;border-top:1px solid #cfd8df;background:#e7edf1;display:flex;justify-content:flex-end;gap:8px}
+.account-msg{min-height:18px;font-size:11px;color:#b42318;margin-top:7px}
 .user-status{font-size:10px;font-weight:800;border-radius:999px;padding:4px 7px;background:#dcfce7;color:#15803d}
 .user-status.off{background:#fee2e2;color:#b42318}
 .userfoot{padding:12px 16px;border-top:1px solid #cfd8df;background:#e7edf1;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
@@ -785,7 +798,10 @@ tr:hover td{
 
                     <div class="field">
                         <label>Conta DRE *</label>
-                        <input id="conta" required placeholder="Digite a conta">
+                        <div style="display:flex;gap:6px;align-items:center">
+                            <select id="conta" required style="flex:1"></select>
+                            <button type="button" class="small" onclick="abrirNovaConta()">＋ Nova conta</button>
+                        </div>
                     </div>
 
 
@@ -824,7 +840,21 @@ tr:hover td{
 
                         <label>Tipo *</label>
 
-                        <select id="tipo"></select>
+                        <select id="tipo" onchange="atualizarDepartamento()"></select>
+
+                    </div>
+
+
+                    <div class="field hidden" id="departamentoField">
+
+                        <label>Departamento *</label>
+
+                        <select id="departamento">
+                            <option value="">Selecione...</option>
+                            <option value="LOJA">LOJA</option>
+                            <option value="GERAL">GERAL</option>
+                            <option value="PISTA">PISTA</option>
+                        </select>
 
                     </div>
 
@@ -929,6 +959,26 @@ tr:hover td{
   </div>
 </div>
 
+<div class="userback hidden" id="accountModalBack">
+  <div class="account-modal">
+    <div class="account-head">
+      <h2>Nova Conta DRE</h2>
+      <button class="close" onclick="fecharNovaConta()">×</button>
+    </div>
+    <div class="account-body">
+      <div class="field">
+        <label>Conta DRE *</label>
+        <input id="novaContaNome" type="text" placeholder="Digite a descrição da conta">
+      </div>
+      <div class="account-msg" id="novaContaMsg"></div>
+    </div>
+    <div class="account-foot">
+      <button class="btn secondary" onclick="fecharNovaConta()">Cancelar</button>
+      <button class="btn primary" id="novaContaSave" onclick="salvarNovaConta()">Salvar Conta</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 
@@ -938,17 +988,19 @@ const SUPABASE_URL='https://jmhzzqpabcqtrvgcxvua.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_4PNduM7AGcnSoz8iw4takA__VKdfesK';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
-let D={registros:[],postos:[],status:[],tipos:[]},mes='';
+let D={registros:[],postos:[],status:[],tipos:[],contas:[]},mes='';
 let ordenacao={campo:null,direcao:1};
 
 const $=id=>document.getElementById(id);
 const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),months=$('months'),report=$('report'),body=$('body'),count=$('count');
-const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
+const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),departamentoField=$('departamentoField'),departamento=$('departamento'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
 const userModalBack=$('userModalBack'),usersBtn=$('usersBtn'),newValidationBtn=$('newValidationBtn'),usersBody=$('usersBody'),userFormTitle=$('userFormTitle'),uId=$('uId'),uNome=$('uNome'),uUsername=$('uUsername'),uSenha=$('uSenha'),uPerfil=$('uPerfil'),uAtivo=$('uAtivo'),uSaveBtn=$('uSaveBtn'),userMsg=$('userMsg');
+const accountModalBack=$('accountModalBack'),novaContaNome=$('novaContaNome'),novaContaSave=$('novaContaSave'),novaContaMsg=$('novaContaMsg');
 let perfilAtual='',usuarioAtual=null,usuariosCache=[];
 
-const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','AGUARDANDO RETORNO','VALIDADO','AJUSTADO','REGISTRADO'];
-const TIPOS_LIST=['Validação','Observação','Ajuste'];
+const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','AGUARDANDO RETORNO','VALIDAÇÃO FINANCEIRO','VALIDADO','AJUSTADO','REGISTRADO'];
+const TIPOS_LIST=['Validação','Observação','Ajuste','Financeiro'];
+const DEPARTAMENTOS_FINANCEIRO=['LOJA','GERAL','PISTA'];
 
 window.addEventListener('DOMContentLoaded',async()=>{
   const {data}=await sb.auth.getSession();
@@ -1016,7 +1068,7 @@ async function logout(){await sb.auth.signOut();}
 
 async function iniciarSistema(){
   esconderLogin();
-  D={registros:[],postos:[],status:STATUS_LIST.slice(),tipos:TIPOS_LIST.slice()};
+  D={registros:[],postos:[],status:STATUS_LIST.slice(),tipos:TIPOS_LIST.slice(),contas:[]};
   try{
     const {data:{user}}=await sb.auth.getUser();
     usuarioAtual=user||null;
@@ -1030,18 +1082,80 @@ async function iniciarSistema(){
     const {data:postosData,error:postosError}=await sb.from('postos').select('id,nome,categoria,ativo').eq('ativo',true).order('categoria').order('nome');
     if(postosError) throw postosError;
     D.postos=(postosData||[]).map(x=>x.nome);
+    await carregarContas();
     await carregarDados();
-    opcoes();postos();competencias();render();
+    opcoes();renderContaOptions();postos();competencias();render();
   }catch(e){erro(e,'Não foi possível carregar o sistema.');}
 }
 
 async function carregarDados(){
-  const {data,error}=await sb.from('validacoes').select('id,competencia,conta_dre,tipo,observacao,valor_envolvido,resultado,status,criado_em,atualizado_em,validacao_postos(posto_id,postos(nome))').order('atualizado_em',{ascending:false});
+  const {data,error}=await sb.from('validacoes').select('id,competencia,conta_dre,tipo,departamento,observacao,valor_envolvido,resultado,status,criado_em,atualizado_em,validacao_postos(posto_id,postos(nome))').order('atualizado_em',{ascending:false});
   if(error) throw error;
   D.registros=(data||[]).map(r=>({
-    id:r.id,competencia:r.competencia||'',conta:r.conta_dre||'',tipo:r.tipo||'Validação',observacao:r.observacao||'',valor:r.valor_envolvido==null?'':String(r.valor_envolvido),resultado:r.resultado||'',status:r.status||'PENDENTE',criadoEm:formatarDataSupabase(r.criado_em),atualizadoEm:formatarDataSupabase(r.atualizado_em),
+    id:r.id,competencia:r.competencia||'',conta:r.conta_dre||'',tipo:r.tipo||'Validação',observacao:r.observacao||'',valor:r.valor_envolvido==null?'':String(r.valor_envolvido),resultado:r.resultado||'',status:r.status||'PENDENTE',departamento:r.departamento||'',criadoEm:formatarDataSupabase(r.criado_em),atualizadoEm:formatarDataSupabase(r.atualizado_em),
     posto:(r.validacao_postos||[]).map(v=>v.postos?.nome).filter(Boolean).join(' / ')
   }));
+}
+
+async function carregarContas(){
+  const {data,error}=await sb.from('contas_dre').select('id,nome,ativo,criado_em').eq('ativo',true).order('nome',{ascending:true});
+  if(error) throw error;
+  D.contas=(data||[]).map(x=>({id:x.id,nome:x.nome||'',ativo:x.ativo!==false,criadoEm:formatarDataSupabase(x.criado_em)}));
+}
+
+function renderContaOptions(valorAtual=''){
+  const atual=valorAtual||conta.value||'';
+  conta.innerHTML='<option value="">Selecione a conta DRE...</option>'+
+    D.contas.map(c=>`<option value="${ea(c.nome)}">${e(c.nome)}</option>`).join('')+
+    '<option value="__NOVA__">＋ Cadastrar nova conta</option>';
+  if(D.contas.some(c=>c.nome===atual)) conta.value=atual;
+  else conta.value='';
+}
+
+conta.addEventListener('change',()=>{
+  if(conta.value==='__NOVA__'){
+    abrirNovaConta();
+    conta.value='';
+  }
+});
+
+function abrirNovaConta(){
+  novaContaNome.value='';
+  novaContaMsg.textContent='';
+  novaContaSave.disabled=false;
+  novaContaSave.textContent='Salvar Conta';
+  accountModalBack.classList.remove('hidden');
+  setTimeout(()=>novaContaNome.focus(),50);
+}
+
+function fecharNovaConta(){
+  accountModalBack.classList.add('hidden');
+}
+
+async function salvarNovaConta(){
+  const nome=novaContaNome.value.trim();
+  novaContaMsg.textContent='';
+  if(!nome){
+    novaContaMsg.textContent='Informe o nome da conta.';
+    return;
+  }
+  novaContaSave.disabled=true;
+  novaContaSave.textContent='Salvando...';
+  try{
+    const {data,error}=await sb.from('contas_dre').insert({nome,ativo:true}).select('id,nome,ativo,criado_em').single();
+    if(error) throw error;
+    D.contas.push({id:data.id,nome:data.nome,ativo:data.ativo!==false,criadoEm:formatarDataSupabase(data.criado_em)});
+    D.contas.sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR',{sensitivity:'base'}));
+    renderContaOptions(data.nome);
+    conta.value=data.nome;
+    fecharNovaConta();
+    sucesso('Conta DRE cadastrada com sucesso.');
+  }catch(x){
+    if(x?.code==='23505') novaContaMsg.textContent='Essa conta DRE já está cadastrada.';
+    else novaContaMsg.textContent=x?.message||'Não foi possível cadastrar a conta.';
+  }
+  novaContaSave.disabled=false;
+  novaContaSave.textContent='Salvar Conta';
 }
 
 function formatarDataSupabase(v){if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
@@ -1157,30 +1271,47 @@ async function alterarSenhaUsuario(idUsuario){
   catch(x){erro(x,'Não foi possível alterar a senha.');}
 }
 
-function nova(){limparForm();comp.value=mes||novoMes();status.value='PENDENTE';mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
-function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;conta.value=r.conta;tipo.value=r.tipo;obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
+function atualizarDepartamento(){
+  const ehFinanceiro=tipo.value==='Financeiro';
+  departamentoField.classList.toggle('hidden',!ehFinanceiro);
+  departamento.required=ehFinanceiro;
+  if(!ehFinanceiro){
+    departamento.value='';
+    if(status.value==='VALIDAÇÃO FINANCEIRO') status.value='PENDENTE';
+    return;
+  }
+  if(!DEPARTAMENTOS_FINANCEIRO.includes(departamento.value)) departamento.value='';
+  if(!['VALIDADO','AJUSTADO','REGISTRADO'].includes(status.value)){
+    status.value='VALIDAÇÃO FINANCEIRO';
+  }
+}
+
+function nova(){limparForm();comp.value=mes||novoMes();tipo.value='Validação';status.value='PENDENTE';atualizarDepartamento();renderContaOptions();mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
+function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
 function selPostos(){let a=[...picker.querySelectorAll('input:checked')].map(x=>x.value);selected.textContent=a.length?a.join(' / '):'Nenhum posto selecionado.';}
-function limparForm(){form.reset();id.value='';picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
+function limparForm(){form.reset();id.value='';departamento.value='';departamentoField.classList.add('hidden');departamento.required=false;renderContaOptions();picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
 
 async function salvar(ev){
   ev.preventDefault();
   const ps=[...picker.querySelectorAll('input:checked')].map(x=>x.value);
   if(!ps.length)return erro(null,'Selecione pelo menos um posto.');
-  if(!conta.value.trim())return erro(null,'Informe a conta DRE.');
+  if(!conta.value.trim()||conta.value==='__NOVA__')return erro(null,'Selecione a conta DRE.');
   const valorNumero=valor.value===''?null:Number(valor.value);
   if(valor.value!==''&&!Number.isFinite(valorNumero))return erro(null,'Informe um valor válido.');
-  const dados={id:id.value,competencia:comp.value,conta:conta.value.trim(),tipo:tipo.value,observacao:obs.value.trim(),valor_envolvido:valorNumero,resultado:resultado.value.trim(),status:status.value};
+  const departamentoValor=tipo.value==='Financeiro'?departamento.value:null;
+  if(tipo.value==='Financeiro'&&!DEPARTAMENTOS_FINANCEIRO.includes(departamentoValor))return erro(null,'Selecione o departamento: LOJA, GERAL ou PISTA.');
+  const dados={id:id.value,competencia:comp.value,conta:conta.value.trim(),tipo:tipo.value,departamento:departamentoValor,observacao:obs.value.trim(),valor_envolvido:valorNumero,resultado:resultado.value.trim(),status:status.value};
   save.disabled=true;save.textContent='Salvando...';
   try{
     let validacaoId=dados.id;
     if(validacaoId){
-      const {error}=await sb.from('validacoes').update({competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status}).eq('id',validacaoId);
+      const {error}=await sb.from('validacoes').update({competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,departamento:dados.departamento,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status}).eq('id',validacaoId);
       if(error)throw error;
       const {data:postosData,error:pErr}=await sb.from('postos').select('id,nome').in('nome',ps);if(pErr)throw pErr;
       const {error:dErr}=await sb.from('validacao_postos').delete().eq('validacao_id',validacaoId);if(dErr)throw dErr;
       if(postosData?.length){const {error:iErr}=await sb.from('validacao_postos').insert(postosData.map(p=>({validacao_id:validacaoId,posto_id:p.id})));if(iErr)throw iErr;}
     }else{
-      const {data:v,error}=await sb.from('validacoes').insert({competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status}).select('id').single();
+      const {data:v,error}=await sb.from('validacoes').insert({competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,departamento:dados.departamento,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status}).select('id').single();
       if(error)throw error;validacaoId=v.id;
       const {data:postosData,error:pErr}=await sb.from('postos').select('id,nome').in('nome',ps);if(pErr)throw pErr;
       if(postosData?.length){const {error:iErr}=await sb.from('validacao_postos').insert(postosData.map(p=>({validacao_id:validacaoId,posto_id:p.id})));if(iErr)throw iErr;}
