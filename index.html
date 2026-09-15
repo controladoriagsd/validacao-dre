@@ -313,20 +313,6 @@ tr:hover td{
     color:#7e22ce
 }
 
-.departamento-select{
-    border:1px solid #c6d2dc;
-    border-radius:7px;
-    padding:6px 10px;
-    font-size:10px;
-    font-weight:800;
-    background:#fff;
-    color:#344054;
-    cursor:pointer;
-    min-width:105px
-}
-
-.departamento-select:disabled{opacity:.65;cursor:wait}
-
 .status{
     border:1px solid transparent;
     border-radius:7px;
@@ -1207,13 +1193,11 @@ function render(){
   a.forEach(r=>{
     let tr=document.createElement('tr');
     let cl=r.tipo==='Observação'?'bo':r.tipo==='Ajuste'?'ba':r.tipo==='Validar departamento'?'bd':'bv';
-    const acoes=perfilAtual==='FINANCEIRO'
-      ? '<span style="color:#98a2b3">—</span>'
-      : '<button class="small" onclick="editar(\''+ej(r.id)+'\')">Editar</button><button class="small danger" onclick="del(\''+ej(r.id)+'\')">Excluir</button>';
-    const departamentoEditavel=perfilAtual==='FINANCEIRO' && r.tipo==='Validar departamento';
-    const departamentoHtml=departamentoEditavel
-      ? `<select class="departamento-select" onchange="alterarDepartamento('${ej(r.id)}',this.value,this)">${DEPARTAMENTOS_FINANCEIRO.map(d=>`<option value="${e(d)}" ${d===r.departamento?'selected':''}>${e(d)}</option>`).join('')}</select>`
+    const deptEditavel=perfilAtual==='FINANCEIRO' && r.tipo==='Validar departamento';
+    const departamentoHtml=deptEditavel
+      ? `<select class="status departamento-select" onchange="dep('${ej(r.id)}',this.value,this)">${DEPARTAMENTOS_FINANCEIRO.map(d=>`<option value="${e(d)}" ${d===r.departamento?'selected':''}>${e(d)}</option>`).join('')}</select>`
       : e(r.departamento||'-');
+    const acoes='<button class="small" onclick="editar(\''+ej(r.id)+'\')">Editar</button>'+(perfilAtual==='ADMIN'?'<button class="small danger" onclick="del(\''+ej(r.id)+'\')">Excluir</button>':'');
     tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${departamentoHtml}</td><td>${e(r.observacao||'-')}</td><td><select class="status status-${r.status.replace(/ /g,'-')}" ${perfilAtual==='FINANCEIRO'?'disabled':''} onchange="st('${ej(r.id)}',this.value);this.className='status status-'+this.value.replace(/ /g,'-')}">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions">${acoes}</div></td>`;
     body.appendChild(tr);
   });
@@ -1317,7 +1301,7 @@ function atualizarDepartamento(){
 }
 
 function nova(){limparForm();comp.value=mes||novoMes();tipo.value='Validação';status.value='PENDENTE';atualizarDepartamento();renderContaOptions();mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
-function editar(id){if(perfilAtual==='FINANCEIRO')return;let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
+function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
 function selPostos(){let a=[...picker.querySelectorAll('input:checked')].map(x=>x.value);selected.textContent=a.length?a.join(' / '):'Nenhum posto selecionado.';}
 function limparForm(){form.reset();id.value='';departamento.value='';departamentoField.classList.add('hidden');departamento.required=false;renderContaOptions();picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
 
@@ -1336,7 +1320,10 @@ async function salvar(ev){
   try{
     let validacaoId=dados.id;
     if(validacaoId){
-      const {error}=await sb.from('validacoes').update({competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,departamento:dados.departamento,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status}).eq('id',validacaoId);
+      const payloadAtualizacao=perfilAtual==='FINANCEIRO'
+        ? {competencia:dados.competencia,conta_dre:dados.conta,departamento:dados.departamento,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null}
+        : {competencia:dados.competencia,conta_dre:dados.conta,tipo:dados.tipo,departamento:dados.departamento,observacao:dados.observacao||null,valor_envolvido:dados.valor_envolvido,resultado:dados.resultado||null,status:dados.status};
+      const {error}=await sb.from('validacoes').update(payloadAtualizacao).eq('id',validacaoId);
       if(error)throw error;
       const {data:postosData,error:pErr}=await sb.from('postos').select('id,nome').in('nome',ps);if(pErr)throw pErr;
       const {error:dErr}=await sb.from('validacao_postos').delete().eq('validacao_id',validacaoId);if(dErr)throw dErr;
@@ -1352,30 +1339,28 @@ async function salvar(ev){
   save.disabled=false;save.textContent='Salvar Registro';
 }
 
+async function dep(id,novoDepartamento,el){
+  if(perfilAtual!=='FINANCEIRO' && perfilAtual!=='ADMIN') return;
+  const anterior=(D.registros.find(x=>x.id===id)||{}).departamento||'';
+  el.disabled=true;
+  try{
+    const {data,error}=await sb.rpc('atualizar_departamento_financeiro',{p_validacao_id:id,p_departamento:novoDepartamento});
+    if(error) throw error;
+    if(!data?.sucesso) throw new Error('Não foi possível alterar o departamento.');
+    const r=D.registros.find(x=>x.id===id);
+    if(r){r.departamento=novoDepartamento;r.atualizadoEm='Agora';}
+    sucesso('Departamento atualizado.');
+    await carregarDados();competencias();render();
+  }catch(x){
+    el.value=anterior;
+    erro(x,'Não foi possível alterar o departamento.');
+  }finally{el.disabled=false;}
+}
 async function st(id,novoStatus){if(perfilAtual==='FINANCEIRO')return;
   const {error}=await sb.from('validacoes').update({status:novoStatus}).eq('id',id);
   if(error){erro(error,'Não foi possível alterar o status.');return;}
   await carregarDados();competencias();render();sucesso('Status atualizado.');
 }
-async function alterarDepartamento(idValidacao,novoDepartamento,selectEl){
-  if(perfilAtual!=='FINANCEIRO')return;
-  if(!DEPARTAMENTOS_FINANCEIRO.includes(novoDepartamento))return erro(null,'Departamento inválido.');
-  if(selectEl)selectEl.disabled=true;
-  try{
-    const {data,error}=await sb.rpc('atualizar_departamento_financeiro',{p_validacao_id:idValidacao,p_departamento:novoDepartamento});
-    if(error)throw error;
-    if(!data?.sucesso)throw new Error(data?.error||'Não foi possível alterar o departamento.');
-    const r=D.registros.find(x=>x.id===idValidacao);
-    if(r){r.departamento=novoDepartamento;r.atualizadoEm=formatarDataSupabase(new Date().toISOString());}
-    render();
-    sucesso('Departamento atualizado.');
-  }catch(x){
-    const r=D.registros.find(x=>x.id===idValidacao);
-    if(selectEl&&r)selectEl.value=r.departamento||'';
-    erro(x,'Não foi possível alterar o departamento.');
-  }finally{if(selectEl)selectEl.disabled=false;}
-}
-
 async function del(id){if(perfilAtual!=='ADMIN')return;let r=D.registros.find(x=>x.id==id);if(!r)return;if(!confirm('Deseja realmente excluir esta validação?\n\nConta: '+r.conta+'\nPosto(s): '+r.posto))return;const {error}=await sb.from('validacoes').delete().eq('id',id);if(error){erro(error,'Não foi possível excluir.');return;}await carregarDados();competencias();render();sucesso('Validação excluída.');}
 function fechar(){modal.classList.add('hidden');}
 function limpar(){fs.value='';ft.value='';fb.value='';render();}
