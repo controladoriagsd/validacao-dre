@@ -639,6 +639,27 @@ tr:hover td{
 .loginhead{background:#0b3553;color:#fff;padding:22px;text-align:center}
 .loginhead strong{display:block;font-size:24px;letter-spacing:2px}.loginhead span{font-size:11px}
 .loginbody{padding:22px}.loginbody label{display:block;font-size:11px;font-weight:700;color:#475467;margin-bottom:6px}.loginbody input{width:100%;padding:10px;border:1px solid #c6d2dc;border-radius:7px;margin-bottom:12px}.loginmsg{min-height:18px;color:#b42318;font-size:11px;margin-bottom:6px}.logout-btn{margin-left:6px;background:#fff;border:1px solid #6e899c;color:#344054;border-radius:6px;height:32px;padding:0 10px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap}
+
+.userback{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:16px;z-index:10000;overflow:hidden}
+.userback.hidden{display:none!important}
+.usermodal{width:min(980px,100%);height:min(88vh,760px);background:#fff;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.userhead{background:#0b3553;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.userhead h2{margin:0;font-size:18px}
+.userbody{padding:16px;background:#edf4f8;overflow:auto;flex:1;min-height:0}
+.usergrid{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr .6fr auto;gap:8px;align-items:end;margin-bottom:12px}
+.usergrid .field{gap:4px}
+.usergrid input,.usergrid select{padding:8px;border:1px solid #c6d2dc;border-radius:7px;background:#fff}
+.userlist{background:#fff;border:1px solid #e2e8f0;border-radius:9px;overflow:auto}
+.userlist table{min-width:760px}
+.userlist th,.userlist td{padding:8px}
+.user-actions{display:flex;gap:5px;white-space:nowrap}
+.user-status{font-size:10px;font-weight:800;border-radius:999px;padding:4px 7px;background:#dcfce7;color:#15803d}
+.user-status.off{background:#fee2e2;color:#b42318}
+.userfoot{padding:12px 16px;border-top:1px solid #cfd8df;background:#e7edf1;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.usermsg{min-height:18px;font-size:11px;color:#b42318;margin:2px 0 8px}
+@media(max-width:900px){.usergrid{grid-template-columns:1fr 1fr 1fr}.usergrid .wide{grid-column:1/-1}}
+@media(max-width:600px){.usergrid{grid-template-columns:1fr}.usergrid .wide{grid-column:auto}}
+
 </style>
 </head>
 
@@ -674,7 +695,7 @@ tr:hover td{
         <button class="top-clear" onclick="limpar()">Limpar filtros</button>
     </div>
 
-    <div style="display:flex;align-items:center;gap:6px"><button class="btn primary" onclick="nova()">＋ Nova Validação</button><button class="logout-btn" onclick="logout()">Sair</button></div>
+    <div style="display:flex;align-items:center;gap:6px"><button class="btn secondary hidden" id="usersBtn" onclick="abrirUsuarios()">Usuários</button><button class="btn primary" id="newValidationBtn" onclick="nova()">＋ Nova Validação</button><button class="logout-btn" onclick="logout()">Sair</button></div>
 </header>
 
 
@@ -872,6 +893,42 @@ tr:hover td{
 </div>
 
 
+
+<div class="userback hidden" id="userModalBack">
+  <div class="usermodal">
+    <div class="userhead">
+      <h2>Administração de Usuários</h2>
+      <button class="close" onclick="fecharUsuarios()">×</button>
+    </div>
+    <div class="userbody">
+      <div class="panel" style="margin-bottom:12px">
+        <div class="ptitle"><span id="userFormTitle">Novo Usuário</span><span style="font-weight:400;color:#667085">ADMIN</span></div>
+        <div style="padding:12px">
+          <div class="usergrid">
+            <div class="field wide"><label>Nome *</label><input id="uNome" type="text" placeholder="Nome completo"></div>
+            <div class="field"><label>Usuário *</label><input id="uUsername" type="text" placeholder="nome.sobrenome" autocapitalize="none" spellcheck="false"></div>
+            <div class="field"><label>Senha *</label><input id="uSenha" type="password" placeholder="Mínimo 6 caracteres"></div>
+            <div class="field"><label>Perfil *</label><select id="uPerfil"><option value="VALIDADOR">VALIDADOR</option><option value="FINANCEIRO">FINANCEIRO</option><option value="CONSULTA">CONSULTA</option><option value="ADMIN">ADMIN</option></select></div>
+            <div class="field"><label>Ativo</label><select id="uAtivo"><option value="true">Sim</option><option value="false">Não</option></select></div>
+            <div class="field" style="justify-content:flex-end"><button class="btn primary" id="uSaveBtn" onclick="salvarUsuario()">Salvar Usuário</button></div>
+          </div>
+          <div class="usermsg" id="userMsg"></div>
+          <input id="uId" type="hidden">
+        </div>
+      </div>
+      <div class="userlist">
+        <table>
+          <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Status</th><th>Criado em</th><th>Ações</th></tr></thead>
+          <tbody id="usersBody"><tr><td colspan="6"><div class="empty">Carregando...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="userfoot">
+      <button class="btn secondary" onclick="fecharUsuarios()">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 
@@ -887,6 +944,8 @@ let ordenacao={campo:null,direcao:1};
 const $=id=>document.getElementById(id);
 const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),months=$('months'),report=$('report'),body=$('body'),count=$('count');
 const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
+const userModalBack=$('userModalBack'),usersBtn=$('usersBtn'),newValidationBtn=$('newValidationBtn'),usersBody=$('usersBody'),userFormTitle=$('userFormTitle'),uId=$('uId'),uNome=$('uNome'),uUsername=$('uUsername'),uSenha=$('uSenha'),uPerfil=$('uPerfil'),uAtivo=$('uAtivo'),uSaveBtn=$('uSaveBtn'),userMsg=$('userMsg');
+let perfilAtual='',usuarioAtual=null,usuariosCache=[];
 
 const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','AGUARDANDO RETORNO','VALIDADO','AJUSTADO','REGISTRADO'];
 const TIPOS_LIST=['Validação','Observação','Ajuste'];
@@ -959,6 +1018,15 @@ async function iniciarSistema(){
   esconderLogin();
   D={registros:[],postos:[],status:STATUS_LIST.slice(),tipos:TIPOS_LIST.slice()};
   try{
+    const {data:{user}}=await sb.auth.getUser();
+    usuarioAtual=user||null;
+    if(user){
+      const {data:perfilData,error:perfilError}=await sb.from('usuarios').select('id,nome,username,perfil,ativo').eq('auth_user_id',user.id).maybeSingle();
+      if(perfilError) throw perfilError;
+      perfilAtual=perfilData?.ativo?String(perfilData.perfil||'').toUpperCase():'';
+    }
+    usersBtn.classList.toggle('hidden',perfilAtual!=='ADMIN');
+    newValidationBtn.classList.toggle('hidden',!['ADMIN','VALIDADOR'].includes(perfilAtual));
     const {data:postosData,error:postosError}=await sb.from('postos').select('id,nome,categoria,ativo').eq('ativo',true).order('categoria').order('nome');
     if(postosError) throw postosError;
     D.postos=(postosData||[]).map(x=>x.nome);
@@ -1008,6 +1076,87 @@ function converterDataParaNumero(valor){const partes=String(valor||'').match(/(\
 function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','observacao','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
 function normalizarValorParaInput(valor){if(valor===null||valor===undefined||valor==='')return '';let n=Number(String(valor).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:'';}
 function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],['VALIDADO',z.VALIDADO],['AJUSTADO',z.AJUSTADO]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div><div style="padding:0 14px 14px;text-align:right"><button class="btn secondary" onclick="exp('pdf')">Exportar PDF</button><button class="btn secondary" onclick="exp('excel')">Exportar Excel</button><button class="btn secondary" onclick="imprimir()">Imprimir</button></div></div>`;}
+
+function limparFormularioUsuario(){
+  uId.value='';uNome.value='';uUsername.value='';uSenha.value='';uPerfil.value='VALIDADOR';uAtivo.value='true';
+  userFormTitle.textContent='Novo Usuário';uSaveBtn.textContent='Salvar Usuário';userMsg.textContent='';
+}
+
+async function abrirUsuarios(){
+  if(perfilAtual!=='ADMIN') return;
+  limparFormularioUsuario();
+  userModalBack.classList.remove('hidden');
+  await carregarUsuarios();
+}
+
+function fecharUsuarios(){userModalBack.classList.add('hidden');}
+
+async function chamarAdminUsers(body){
+  const {data,error}=await sb.functions.invoke('admin-users',{body});
+  if(error){
+    let msg='Não foi possível concluir a operação.';
+    try{const detalhe=await error.context?.json();if(detalhe?.error)msg=detalhe.error;else if(detalhe?.message)msg=detalhe.message;}catch(_e){}
+    throw new Error(msg);
+  }
+  if(!data?.ok) throw new Error(data?.error||'Operação não concluída.');
+  return data;
+}
+
+async function carregarUsuarios(){
+  usersBody.innerHTML='<tr><td colspan="6"><div class="empty">Carregando...</div></td></tr>';
+  try{
+    const data=await chamarAdminUsers({action:'list'});
+    usuariosCache=data.usuarios||[];
+    usersBody.innerHTML='';
+    if(!usuariosCache.length){usersBody.innerHTML='<tr><td colspan="6"><div class="empty">Nenhum usuário cadastrado.</div></td></tr>';return;}
+    usuariosCache.forEach(u=>{
+      const tr=document.createElement('tr');
+      const criado=u.criado_em?formatarDataSupabase(u.criado_em):'-';
+      const statusHtml=u.ativo?'<span class="user-status">ATIVO</span>':'<span class="user-status off">INATIVO</span>';
+      tr.innerHTML=`<td><b>${e(u.nome||'')}</b></td><td>${e(u.username||'')}</td><td>${e(u.perfil||'')}</td><td>${statusHtml}</td><td>${e(criado)}</td><td><div class="user-actions"><button class="small" onclick="editarUsuario('${ej(u.id)}')">Editar</button><button class="small" onclick="alterarSenhaUsuario('${ej(u.id)}')">Senha</button></div></td>`;
+      usersBody.appendChild(tr);
+    });
+  }catch(x){
+    usersBody.innerHTML=`<tr><td colspan="6"><div class="empty">${e(x.message||'Erro ao carregar usuários.')}</div></td></tr>`;
+  }
+}
+
+function editarUsuario(idUsuario){
+  const u=usuariosCache.find(x=>x.id===idUsuario);if(!u)return;
+  uId.value=u.id;uNome.value=u.nome||'';uUsername.value=u.username||'';uSenha.value='';uPerfil.value=u.perfil||'VALIDADOR';uAtivo.value=u.ativo?'true':'false';
+  userFormTitle.textContent='Editar Usuário';uSaveBtn.textContent='Atualizar Usuário';userMsg.textContent='';
+}
+
+async function salvarUsuario(){
+  userMsg.textContent='';
+  const nome=uNome.value.trim(),username=uUsername.value.trim().toLowerCase(),senha=uSenha.value,perfil=uPerfil.value,ativo=uAtivo.value==='true',editId=uId.value;
+  if(!nome||!username){userMsg.textContent='Informe nome e usuário.';return;}
+  uSaveBtn.disabled=true;uSaveBtn.textContent='Salvando...';
+  try{
+    if(editId){
+      await chamarAdminUsers({action:'update',id:editId,nome,username,perfil,ativo});
+      if(senha){await chamarAdminUsers({action:'password',id:editId,senha});}
+      sucesso('Usuário atualizado com sucesso.');
+    }else{
+      if(!senha){userMsg.textContent='Informe uma senha.';uSaveBtn.disabled=false;uSaveBtn.textContent='Salvar Usuário';return;}
+      await chamarAdminUsers({action:'create',nome,username,senha,perfil,ativo});
+      sucesso('Usuário criado com sucesso.');
+    }
+    limparFormularioUsuario();
+    await carregarUsuarios();
+  }catch(x){userMsg.textContent=x.message||'Não foi possível salvar o usuário.';}
+  uSaveBtn.disabled=false;uSaveBtn.textContent='Salvar Usuário';
+}
+
+async function alterarSenhaUsuario(idUsuario){
+  const u=usuariosCache.find(x=>x.id===idUsuario);if(!u)return;
+  const novaSenha=prompt('Digite a nova senha para '+(u.username||'usuário')+':');
+  if(novaSenha===null)return;
+  if(novaSenha.length<6){erro(null,'A senha deve ter pelo menos 6 caracteres.');return;}
+  try{await chamarAdminUsers({action:'password',id:idUsuario,senha:novaSenha});sucesso('Senha alterada com sucesso.');}
+  catch(x){erro(x,'Não foi possível alterar a senha.');}
+}
+
 function nova(){limparForm();comp.value=mes||novoMes();status.value='PENDENTE';mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
 function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;conta.value=r.conta;tipo.value=r.tipo;obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
 function selPostos(){let a=[...picker.querySelectorAll('input:checked')].map(x=>x.value);selected.textContent=a.length?a.join(' / '):'Nenhum posto selecionado.';}
