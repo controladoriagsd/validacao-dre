@@ -1105,7 +1105,7 @@ async function chamarAdminUsers(body){
 async function carregarUsuarios(){
   usersBody.innerHTML='<tr><td colspan="6"><div class="empty">Carregando...</div></td></tr>';
   try{
-    const data=await chamarAdminUsers({action:'list'});
+    const data=await chamarAdminUsers({acao:'listar'});
     usuariosCache=data.usuarios||[];
     usersBody.innerHTML='';
     if(!usuariosCache.length){usersBody.innerHTML='<tr><td colspan="6"><div class="empty">Nenhum usuário cadastrado.</div></td></tr>';return;}
@@ -1134,12 +1134,12 @@ async function salvarUsuario(){
   uSaveBtn.disabled=true;uSaveBtn.textContent='Salvando...';
   try{
     if(editId){
-      await chamarAdminUsers({action:'update',id:editId,nome,username,perfil,ativo});
-      if(senha){await chamarAdminUsers({action:'password',id:editId,senha});}
+      await chamarAdminUsers({acao:'atualizar',id:editId,nome,username,perfil,ativo});
+      if(senha){await chamarAdminUsers({acao:'senha',id:editId,senha});}
       sucesso('Usuário atualizado com sucesso.');
     }else{
       if(!senha){userMsg.textContent='Informe uma senha.';uSaveBtn.disabled=false;uSaveBtn.textContent='Salvar Usuário';return;}
-      await chamarAdminUsers({action:'create',nome,username,senha,perfil,ativo});
+      await chamarAdminUsers({acao:'criar',nome,username,senha,perfil,ativo});
       sucesso('Usuário criado com sucesso.');
     }
     limparFormularioUsuario();
@@ -1153,7 +1153,7 @@ async function alterarSenhaUsuario(idUsuario){
   const novaSenha=prompt('Digite a nova senha para '+(u.username||'usuário')+':');
   if(novaSenha===null)return;
   if(novaSenha.length<6){erro(null,'A senha deve ter pelo menos 6 caracteres.');return;}
-  try{await chamarAdminUsers({action:'password',id:idUsuario,senha:novaSenha});sucesso('Senha alterada com sucesso.');}
+  try{await chamarAdminUsers({acao:'senha',id:idUsuario,senha:novaSenha});sucesso('Senha alterada com sucesso.');}
   catch(x){erro(x,'Não foi possível alterar a senha.');}
 }
 
