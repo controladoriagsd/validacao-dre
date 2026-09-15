@@ -308,6 +308,25 @@ tr:hover td{
     color:#c2410c
 }
 
+.bd{
+    background:#f3e8ff;
+    color:#7e22ce
+}
+
+.departamento-select{
+    border:1px solid #c6d2dc;
+    border-radius:7px;
+    padding:6px 10px;
+    font-size:10px;
+    font-weight:800;
+    background:#fff;
+    color:#344054;
+    cursor:pointer;
+    min-width:105px
+}
+
+.departamento-select:disabled{opacity:.65;cursor:wait}
+
 .status{
     border:1px solid transparent;
     border-radius:7px;
@@ -673,6 +692,7 @@ tr:hover td{
 @media(max-width:900px){.usergrid{grid-template-columns:1fr 1fr 1fr}.usergrid .wide{grid-column:1/-1}}
 @media(max-width:600px){.usergrid{grid-template-columns:1fr}.usergrid .wide{grid-column:auto}}
 
+.app-footer{max-width:1400px;margin:0 auto;padding:18px 20px 24px;text-align:center;color:#6b7280;font-size:12px;font-weight:600;}
 </style>
 </head>
 
@@ -752,6 +772,7 @@ tr:hover td{
                         <th class="sortable" onclick="ordenarPor('conta')">Conta <span id="sort-conta"></span></th>
                         <th class="sortable" onclick="ordenarPor('posto')">Posto(s) <span id="sort-posto"></span></th>
                         <th class="sortable" onclick="ordenarPor('tipo')">Tipo <span id="sort-tipo"></span></th>
+                        <th class="sortable" onclick="ordenarPor('departamento')">Departamento <span id="sort-departamento"></span></th>
                         <th class="sortable" onclick="ordenarPor('observacao')">O que validar / Observação <span id="sort-observacao"></span></th>
                         <th class="sortable" onclick="ordenarPor('status')">Status <span id="sort-status"></span></th>
                         <th class="sortable" onclick="ordenarPor('atualizadoEm')">Atualizado <span id="sort-atualizadoEm"></span></th>
@@ -998,8 +1019,8 @@ const userModalBack=$('userModalBack'),usersBtn=$('usersBtn'),newValidationBtn=$
 const accountModalBack=$('accountModalBack'),novaContaNome=$('novaContaNome'),novaContaSave=$('novaContaSave'),novaContaMsg=$('novaContaMsg');
 let perfilAtual='',usuarioAtual=null,usuariosCache=[];
 
-const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','AGUARDANDO RETORNO','VALIDAÇÃO FINANCEIRO','VALIDADO','AJUSTADO','REGISTRADO'];
-const TIPOS_LIST=['Validação','Observação','Ajuste','Financeiro'];
+const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','AGUARDANDO RETORNO','VALIDADO','AJUSTADO','REGISTRADO'];
+const TIPOS_LIST=['Validação','Observação','Ajuste','Financeiro','Validar departamento'];
 const DEPARTAMENTOS_FINANCEIRO=['LOJA','GERAL','PISTA'];
 
 window.addEventListener('DOMContentLoaded',async()=>{
@@ -1177,17 +1198,30 @@ function competencias(){let a=[...new Set(D.registros.map(r=>r.competencia).filt
 
 function render(){
   mes=fc.value||mes;let a=D.registros.filter(r=>r.competencia===mes);
+  if(perfilAtual==='FINANCEIRO') a=a.filter(r=>r.tipo==='Financeiro'||r.tipo==='Validar departamento');
   if(fs.value)a=a.filter(r=>r.status===fs.value);if(ft.value)a=a.filter(r=>r.tipo===ft.value);let q=fb.value.toLowerCase().trim();
   if(q)a=a.filter(r=>[r.conta,r.posto,r.tipo,r.observacao,r.resultado,r.status].join(' ').toLowerCase().includes(q));
   if(ordenacao.campo)a.sort((x,y)=>compararRegistros(x,y,ordenacao.campo)*ordenacao.direcao);
   atualizarIndicadoresOrdenacao();relatorio();body.innerHTML='';count.textContent=a.length+' registro(s)';
   if(!a.length){body.innerHTML='<tr><td colspan="8"><div class="empty">Nenhuma validação encontrada.</div></td></tr>';return;}
-  a.forEach(r=>{let tr=document.createElement('tr');let cl=r.tipo==='Observação'?'bo':r.tipo==='Ajuste'?'ba':'bv';tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${e(r.observacao||'-')}</td><td><select class="status status-${r.status.replace(/ /g,'-')}" onchange="st('${ej(r.id)}',this.value);this.className='status status-'+this.value.replace(/ /g,'-')">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions"><button class="small" onclick="editar('${ej(r.id)}')">Editar</button><button class="small danger" onclick="del('${ej(r.id)}')">Excluir</button></div></td>`;body.appendChild(tr);});
+  a.forEach(r=>{
+    let tr=document.createElement('tr');
+    let cl=r.tipo==='Observação'?'bo':r.tipo==='Ajuste'?'ba':r.tipo==='Validar departamento'?'bd':'bv';
+    const acoes=perfilAtual==='FINANCEIRO'
+      ? '<span style="color:#98a2b3">—</span>'
+      : '<button class="small" onclick="editar(\''+ej(r.id)+'\')">Editar</button><button class="small danger" onclick="del(\''+ej(r.id)+'\')">Excluir</button>';
+    const departamentoEditavel=perfilAtual==='FINANCEIRO' && r.tipo==='Validar departamento';
+    const departamentoHtml=departamentoEditavel
+      ? `<select class="departamento-select" onchange="alterarDepartamento('${ej(r.id)}',this.value,this)">${DEPARTAMENTOS_FINANCEIRO.map(d=>`<option value="${e(d)}" ${d===r.departamento?'selected':''}>${e(d)}</option>`).join('')}</select>`
+      : e(r.departamento||'-');
+    tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${departamentoHtml}</td><td>${e(r.observacao||'-')}</td><td><select class="status status-${r.status.replace(/ /g,'-')}" ${perfilAtual==='FINANCEIRO'?'disabled':''} onchange="st('${ej(r.id)}',this.value);this.className='status status-'+this.value.replace(/ /g,'-')}">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions">${acoes}</div></td>`;
+    body.appendChild(tr);
+  });
 }
 function ordenarPor(campo){if(ordenacao.campo===campo)ordenacao.direcao*=-1;else{ordenacao.campo=campo;ordenacao.direcao=1;}render();}
 function compararRegistros(a,b,campo){const va=a[campo]??'',vb=b[campo]??'';if(campo==='atualizadoEm')return converterDataParaNumero(va)-converterDataParaNumero(vb);return String(va).localeCompare(String(vb),'pt-BR',{numeric:true,sensitivity:'base'});}
 function converterDataParaNumero(valor){const partes=String(valor||'').match(/(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?/);if(!partes)return 0;return new Date(Number(partes[3]),Number(partes[2])-1,Number(partes[1]),Number(partes[4]||0),Number(partes[5]||0)).getTime();}
-function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','observacao','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
+function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','departamento','observacao','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
 function normalizarValorParaInput(valor){if(valor===null||valor===undefined||valor==='')return '';let n=Number(String(valor).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:'';}
 function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],['VALIDADO',z.VALIDADO],['AJUSTADO',z.AJUSTADO]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div><div style="padding:0 14px 14px;text-align:right"><button class="btn secondary" onclick="exp('pdf')">Exportar PDF</button><button class="btn secondary" onclick="exp('excel')">Exportar Excel</button><button class="btn secondary" onclick="imprimir()">Imprimir</button></div></div>`;}
 
@@ -1272,22 +1306,18 @@ async function alterarSenhaUsuario(idUsuario){
 }
 
 function atualizarDepartamento(){
-  const ehFinanceiro=tipo.value==='Financeiro';
-  departamentoField.classList.toggle('hidden',!ehFinanceiro);
-  departamento.required=ehFinanceiro;
-  if(!ehFinanceiro){
+  const usaDepartamento=['Financeiro','Validar departamento'].includes(tipo.value);
+  departamentoField.classList.toggle('hidden',!usaDepartamento);
+  departamento.required=usaDepartamento;
+  if(!usaDepartamento){
     departamento.value='';
-    if(status.value==='VALIDAÇÃO FINANCEIRO') status.value='PENDENTE';
     return;
   }
   if(!DEPARTAMENTOS_FINANCEIRO.includes(departamento.value)) departamento.value='';
-  if(!['VALIDADO','AJUSTADO','REGISTRADO'].includes(status.value)){
-    status.value='VALIDAÇÃO FINANCEIRO';
-  }
 }
 
 function nova(){limparForm();comp.value=mes||novoMes();tipo.value='Validação';status.value='PENDENTE';atualizarDepartamento();renderContaOptions();mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
-function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
+function editar(id){if(perfilAtual==='FINANCEIRO')return;let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
 function selPostos(){let a=[...picker.querySelectorAll('input:checked')].map(x=>x.value);selected.textContent=a.length?a.join(' / '):'Nenhum posto selecionado.';}
 function limparForm(){form.reset();id.value='';departamento.value='';departamentoField.classList.add('hidden');departamento.required=false;renderContaOptions();picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
 
@@ -1298,8 +1328,9 @@ async function salvar(ev){
   if(!conta.value.trim()||conta.value==='__NOVA__')return erro(null,'Selecione a conta DRE.');
   const valorNumero=valor.value===''?null:Number(valor.value);
   if(valor.value!==''&&!Number.isFinite(valorNumero))return erro(null,'Informe um valor válido.');
-  const departamentoValor=tipo.value==='Financeiro'?departamento.value:null;
-  if(tipo.value==='Financeiro'&&!DEPARTAMENTOS_FINANCEIRO.includes(departamentoValor))return erro(null,'Selecione o departamento: LOJA, GERAL ou PISTA.');
+  const usaDepartamento=['Financeiro','Validar departamento'].includes(tipo.value);
+  const departamentoValor=usaDepartamento?departamento.value:null;
+  if(usaDepartamento&&!DEPARTAMENTOS_FINANCEIRO.includes(departamentoValor))return erro(null,'Selecione o departamento: LOJA, GERAL ou PISTA.');
   const dados={id:id.value,competencia:comp.value,conta:conta.value.trim(),tipo:tipo.value,departamento:departamentoValor,observacao:obs.value.trim(),valor_envolvido:valorNumero,resultado:resultado.value.trim(),status:status.value};
   save.disabled=true;save.textContent='Salvando...';
   try{
@@ -1321,19 +1352,38 @@ async function salvar(ev){
   save.disabled=false;save.textContent='Salvar Registro';
 }
 
-async function st(id,novoStatus){
+async function st(id,novoStatus){if(perfilAtual==='FINANCEIRO')return;
   const {error}=await sb.from('validacoes').update({status:novoStatus}).eq('id',id);
   if(error){erro(error,'Não foi possível alterar o status.');return;}
   await carregarDados();competencias();render();sucesso('Status atualizado.');
 }
-async function del(id){let r=D.registros.find(x=>x.id==id);if(!r)return;if(!confirm('Deseja realmente excluir esta validação?\n\nConta: '+r.conta+'\nPosto(s): '+r.posto))return;const {error}=await sb.from('validacoes').delete().eq('id',id);if(error){erro(error,'Não foi possível excluir.');return;}await carregarDados();competencias();render();sucesso('Validação excluída.');}
+async function alterarDepartamento(idValidacao,novoDepartamento,selectEl){
+  if(perfilAtual!=='FINANCEIRO')return;
+  if(!DEPARTAMENTOS_FINANCEIRO.includes(novoDepartamento))return erro(null,'Departamento inválido.');
+  if(selectEl)selectEl.disabled=true;
+  try{
+    const {data,error}=await sb.rpc('atualizar_departamento_financeiro',{p_validacao_id:idValidacao,p_departamento:novoDepartamento});
+    if(error)throw error;
+    if(!data?.sucesso)throw new Error(data?.error||'Não foi possível alterar o departamento.');
+    const r=D.registros.find(x=>x.id===idValidacao);
+    if(r){r.departamento=novoDepartamento;r.atualizadoEm=formatarDataSupabase(new Date().toISOString());}
+    render();
+    sucesso('Departamento atualizado.');
+  }catch(x){
+    const r=D.registros.find(x=>x.id===idValidacao);
+    if(selectEl&&r)selectEl.value=r.departamento||'';
+    erro(x,'Não foi possível alterar o departamento.');
+  }finally{if(selectEl)selectEl.disabled=false;}
+}
+
+async function del(id){if(perfilAtual!=='ADMIN')return;let r=D.registros.find(x=>x.id==id);if(!r)return;if(!confirm('Deseja realmente excluir esta validação?\n\nConta: '+r.conta+'\nPosto(s): '+r.posto))return;const {error}=await sb.from('validacoes').delete().eq('id',id);if(error){erro(error,'Não foi possível excluir.');return;}await carregarDados();competencias();render();sucesso('Validação excluída.');}
 function fechar(){modal.classList.add('hidden');}
 function limpar(){fs.value='';ft.value='';fb.value='';render();}
 
 function exp(t){let a=D.registros.filter(r=>r.competencia===mes);if(!a.length)return erro(null,'Não há validações nessa competência.');if(t==='pdf')return exportarPdfLocal(a);exportarExcelLocal(a);}
 function exportarPdfLocal(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');let titulo='Relatório de Validação DRE — '+fmt(mes);w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(titulo)+'</title><style>body{font:12px Arial,sans-serif;color:#172033;padding:28px}h1{margin:0 0 4px;font-size:22px}h2{margin:0 0 18px;font-size:16px}p{margin:0 0 16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cfd6df;padding:7px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}.status{font-weight:700}.pendente{background:#fee2e2}.validado,.ajustado,.registrado{background:#dcfce7}.validacao{background:#dbeafe}.aguardando{background:#ffedd5}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><thead><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>O que validar / Observação</th><th>Resultado</th><th>Status</th></tr></thead><tbody>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td class="status '+classeStatusImpressao(r.status)+'">'+e(r.status)+'</td></tr>').join('')+'</tbody></table></body></html>');w.document.close();w.focus();setTimeout(()=>{w.print();sucesso('Relatório aberto para salvar como PDF.');},250);}
 function classeStatusImpressao(s){return s==='PENDENTE'?'pendente':s==='VALIDADO'?'validado':s==='AJUSTADO'?'ajustado':s==='REGISTRADO'?'registrado':s==='AGUARDANDO RETORNO'?'aguardando':'validacao';}
-function exportarExcelLocal(a){let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('');let htmlExcel='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>O que validar / Observação</th><th>Valor Envolvido</th><th>Resultado da Validação</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',htmlExcel],{type:'application/vnd.ms-excel;charset=utf-8'});let url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download='Relatorio_Validacao_DRE_'+mes+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Arquivo Excel gerado.');}
+function exportarExcelLocal(a){let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('');let htmlExcel='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>O que validar / Observação</th><th>Valor Envolvido</th><th>Resultado da Validação</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',htmlExcel],{type:'application/vnd.ms-excel;charset=utf-8'});let url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download='Relatorio_Validacao_DRE_'+mes+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Arquivo Excel gerado.');}
 function imprimir(){let a=D.registros.filter(r=>r.competencia===mes),w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para imprimir.');w.document.write('<html><head><title>Relatório DRE</title><style>body{font:12px Arial;padding:25px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left}th{background:#eee}</style></head><body><h1>GRUPO SÃO DOMINGOS</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Observação</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.print();}
 function fmt(c){let p=c.split('-'),m=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];return p.length==2?(m[+p[1]]||p[1])+'/'+p[0]:c;}
 function novoMes(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
@@ -1344,5 +1394,6 @@ function sucesso(t){toast.textContent=t;toast.className='toast show';setTimeout(
 function erro(x,p){toast.textContent=p+(x&&x.message?' '+x.message:'');toast.className='toast show error';setTimeout(()=>toast.className='toast',6000);}
 </script>
 
+<footer class="app-footer">Desenvolvido por Controladoria GSD</footer>
 </body>
 </html>
