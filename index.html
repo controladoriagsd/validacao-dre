@@ -1353,7 +1353,7 @@ main.container{padding-top:6px !important;}
 <div class="userback hidden" id="accountModalBack">
   <div class="account-modal">
     <div class="account-head">
-      <h2>Nova Conta DRE</h2>
+      <h2 id="contaModalTitle">Nova Conta DRE</h2>
       <button class="close" onclick="fecharNovaConta()">×</button>
     </div>
     <div class="account-body">
@@ -1367,6 +1367,7 @@ main.container{padding-top:6px !important;}
       <button class="btn secondary" onclick="fecharNovaConta()">Cancelar</button>
       <button class="btn primary" id="novaContaSave" onclick="salvarNovaConta()">Salvar Conta</button>
     </div>
+    <input type="hidden" id="contaEditId">
   </div>
 </div>
 
@@ -1386,7 +1387,7 @@ const $=id=>document.getElementById(id);
 const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),months=$('months'),report=$('report'),body=$('body'),count=$('count');
 const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),departamentoField=$('departamentoField'),departamento=$('departamento'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
 const userModalBack=$('userModalBack'),newValidationBtn=null,usersBody=$('usersBody'),userFormTitle=$('userFormTitle'),uId=$('uId'),uNome=$('uNome'),uUsername=$('uUsername'),uSenha=$('uSenha'),uPerfil=$('uPerfil'),uAtivo=$('uAtivo'),uSaveBtn=$('uSaveBtn'),userMsg=$('userMsg');
-const accountModalBack=$('accountModalBack'),novaContaNome=$('novaContaNome'),novaContaSave=$('novaContaSave'),novaContaMsg=$('novaContaMsg');
+const accountModalBack=$('accountModalBack'),novaContaNome=$('novaContaNome'),novaContaSave=$('novaContaSave'),novaContaMsg=$('novaContaMsg'),contaModalTitle=$('contaModalTitle'),contaEditId=$('contaEditId');
 const accountsManageBack=$('accountsManageBack'),accountsBody=$('accountsBody'),accountsManageMsg=$('accountsManageMsg'),reportModalBack=$('reportModalBack'),reportTitle=$('reportTitle'),reportNote=$('reportNote'),reportSummary=$('reportSummary'),reportHead=$('reportHead'),reportBody=$('reportBody');
 const configModalBack=$('configModalBack'),configTitle=$('configTitle'),configSubtitle=$('configSubtitle'),configHint=$('configHint'),configMsg=$('configMsg'),configHead=$('configHead'),configBody=$('configBody'),configNewBtn=$('configNewBtn'),configEditBack=$('configEditBack'),configEditTitle=$('configEditTitle'),configEditSubtitle=$('configEditSubtitle'),configEditId=$('configEditId'),configEditLabel=$('configEditLabel'),configEditNome=$('configEditNome'),configEditNote=$('configEditNote'),configEditMsg=$('configEditMsg'),configEditSave=$('configEditSave'),configCategoriaField=$('configCategoriaField'),configEditCategoria=$('configEditCategoria');
 let configAtual='postos',configCache=[];
@@ -1580,9 +1581,9 @@ async function salvarItemConfig(){
     if(configAtual==='postos'){
       const categoria=(configEditCategoria.value||'POSTO').trim()||'POSTO';
       if(editId){
-        const {data:postoAtualizado,error}=await sb.from('postos').update({nome,categoria}).eq('id',editId).select('id,nome,categoria,ativo').single();
+        const {data:postoAtualizado,error}=await sb.from('postos').update({nome,categoria}).eq('id',editId).select('id,nome,categoria,ativo').maybeSingle();
         if(error)throw error;
-        if(!postoAtualizado)throw new Error('O posto não foi atualizado no banco de dados.');
+        if(!postoAtualizado)throw new Error('O posto não foi atualizado. Verifique a permissão de UPDATE da tabela postos no Supabase.');
       }else{
         const {error}=await sb.from('postos').insert({nome,categoria,ativo:true});
         if(error)throw error;
@@ -1632,7 +1633,7 @@ async function carregarContasCadastro(){
     if(!D.contas.length){accountsBody.innerHTML='<tr><td colspan="3"><div class="empty">Nenhuma conta ativa cadastrada.</div></td></tr>';return;}
     D.contas.forEach(c=>{
       const tr=document.createElement('tr');
-      tr.innerHTML=`<td><b>${e(c.nome)}</b></td><td>${e(c.criadoEm||'-')}</td><td><div class="account-actions"><button class="small danger" onclick="excluirConta('${ej(c.id)}')">Excluir</button></div></td>`;
+      tr.innerHTML=`<td><b>${e(c.nome)}</b></td><td>${e(c.criadoEm||'-')}</td><td><div class="account-actions"><button class="small" onclick="abrirEditarConta('${ej(c.id)}')">Editar</button><button class="small danger" onclick="excluirConta('${ej(c.id)}')">Inativar</button></div></td>`;
       accountsBody.appendChild(tr);
     });
   }catch(x){accountsBody.innerHTML=`<tr><td colspan="3"><div class="empty">${e(x.message||'Erro ao carregar contas.')}</div></td></tr>`;}
@@ -1681,6 +1682,9 @@ function exportarRelatorioExcel(a){const titulo=reportTitle.textContent;let rows
 function exportarRelatorioPdf(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(reportTitle.textContent)+'</title><style>body{font:12px Arial;padding:28px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>'+e(reportTitle.textContent)+'</h2><table><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.focus();setTimeout(()=>w.print(),200);}
 function imprimirRelatorioAtual(){exportarRelatorioPdf(relatorioRows);}
 function abrirNovaConta(){
+  if(!['ADMIN','VALIDADOR'].includes(perfilAtual))return erro(null,'Seu perfil não possui acesso ao cadastro de contas.');
+  contaEditId.value='';
+  contaModalTitle.textContent='Nova Conta DRE';
   novaContaNome.value='';
   novaContaMsg.textContent='';
   novaContaSave.disabled=false;
@@ -1689,12 +1693,26 @@ function abrirNovaConta(){
   setTimeout(()=>novaContaNome.focus(),50);
 }
 
+function abrirEditarConta(idConta){
+  if(!['ADMIN','VALIDADOR'].includes(perfilAtual))return erro(null,'Seu perfil não possui acesso ao cadastro de contas.');
+  const c=D.contas.find(x=>x.id===idConta);if(!c)return;
+  contaEditId.value=c.id;
+  contaModalTitle.textContent='Editar Conta DRE';
+  novaContaNome.value=c.nome||'';
+  novaContaMsg.textContent='';
+  novaContaSave.disabled=false;
+  novaContaSave.textContent='Salvar Alteração';
+  accountModalBack.classList.remove('hidden');
+  setTimeout(()=>{novaContaNome.focus();novaContaNome.select();},50);
+}
+
 function fecharNovaConta(){
   accountModalBack.classList.add('hidden');
 }
 
 async function salvarNovaConta(){
   const nome=novaContaNome.value.trim();
+  const editId=contaEditId.value;
   novaContaMsg.textContent='';
   if(!nome){
     novaContaMsg.textContent='Informe o nome da conta.';
@@ -1703,20 +1721,36 @@ async function salvarNovaConta(){
   novaContaSave.disabled=true;
   novaContaSave.textContent='Salvando...';
   try{
-    const {data,error}=await sb.from('contas_dre').insert({nome,ativo:true}).select('id,nome,ativo,criado_em').single();
-    if(error) throw error;
-    D.contas.push({id:data.id,nome:data.nome,ativo:data.ativo!==false,criadoEm:formatarDataSupabase(data.criado_em)});
-    D.contas.sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR',{sensitivity:'base'}));
-    renderContaOptions(data.nome);
-    conta.value=data.nome;
-    fecharNovaConta();
-    sucesso('Conta DRE cadastrada com sucesso.');
+    if(editId){
+      const antigo=D.contas.find(x=>x.id===editId)?.nome||'';
+      const {data,error}=await sb.from('contas_dre').update({nome}).eq('id',editId).select('id,nome,ativo,criado_em').maybeSingle();
+      if(error)throw error;
+      if(!data)throw new Error('A conta não foi atualizada. Verifique a permissão de UPDATE da tabela contas_dre.');
+      await carregarContas();
+      await carregarDados();
+      renderContaOptions();
+      competencias();
+      render();
+      fecharNovaConta();
+      await carregarContasCadastro();
+      sucesso('Conta DRE atualizada com sucesso.');
+    }else{
+      const {data,error}=await sb.from('contas_dre').insert({nome,ativo:true}).select('id,nome,ativo,criado_em').single();
+      if(error) throw error;
+      D.contas.push({id:data.id,nome:data.nome,ativo:data.ativo!==false,criadoEm:formatarDataSupabase(data.criado_em)});
+      D.contas.sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR',{sensitivity:'base'}));
+      renderContaOptions(data.nome);
+      conta.value=data.nome;
+      fecharNovaConta();
+      await carregarContasCadastro();
+      sucesso('Conta DRE cadastrada com sucesso.');
+    }
   }catch(x){
     if(x?.code==='23505') novaContaMsg.textContent='Essa conta DRE já está cadastrada.';
-    else novaContaMsg.textContent=x?.message||'Não foi possível cadastrar a conta.';
+    else novaContaMsg.textContent=x?.message||'Não foi possível salvar a conta.';
   }
   novaContaSave.disabled=false;
-  novaContaSave.textContent='Salvar Conta';
+  novaContaSave.textContent=editId?'Salvar Alteração':'Salvar Conta';
 }
 
 function formatarDataSupabase(v){if(!v)return '';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
