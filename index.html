@@ -1042,6 +1042,7 @@ td.result-cell{min-width:260px;width:260px;}
     <button class="taskbtn" onclick="toggleTaskMenu('sistemaMenu')">Sistema ▾</button>
     <div class="taskdrop">
       <button id="criarUsuarioMenuItem" class="admin-config-item" onclick="abrirUsuarios();fecharTaskMenus()">Criar usuário</button>
+      <button onclick="abrirMinhaSenha();fecharTaskMenus()">Alterar minha senha</button>
       <button onclick="trocarUsuario();fecharTaskMenus()">Trocar de usuário</button>
       <button class="danger-item" onclick="logout();fecharTaskMenus()">Sair</button>
     </div>
@@ -1428,6 +1429,30 @@ td.result-cell{min-width:260px;width:260px;}
   </div>
 </div>
 
+<div class="userback hidden" id="passwordModalBack">
+  <div class="account-modal">
+    <div class="account-head">
+      <h2>Alterar minha senha</h2>
+      <button class="close" onclick="fecharMinhaSenha()">×</button>
+    </div>
+    <div class="account-body">
+      <div class="field">
+        <label>Nova senha *</label>
+        <input id="minhaNovaSenha" type="password" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="field">
+        <label>Confirmar nova senha *</label>
+        <input id="minhaNovaSenhaConfirmar" type="password" autocomplete="new-password" placeholder="Digite novamente a nova senha">
+      </div>
+      <div class="account-msg" id="minhaSenhaMsg"></div>
+    </div>
+    <div class="account-foot">
+      <button class="btn secondary" onclick="fecharMinhaSenha()">Cancelar</button>
+      <button class="btn primary" id="minhaSenhaSave" onclick="salvarMinhaSenha()">Alterar Senha</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 
@@ -1445,6 +1470,7 @@ const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),report=$('report'),body=$('bod
 const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),departamentoField=$('departamentoField'),departamento=$('departamento'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
 const userModalBack=$('userModalBack'),newValidationBtn=null,usersBody=$('usersBody'),userFormTitle=$('userFormTitle'),uId=$('uId'),uNome=$('uNome'),uUsername=$('uUsername'),uSenha=$('uSenha'),uPerfil=$('uPerfil'),uAtivo=$('uAtivo'),uSaveBtn=$('uSaveBtn'),userMsg=$('userMsg');
 const accountModalBack=$('accountModalBack'),novaContaNome=$('novaContaNome'),novaContaSave=$('novaContaSave'),novaContaMsg=$('novaContaMsg'),contaModalTitle=$('contaModalTitle'),contaEditId=$('contaEditId');
+const passwordModalBack=$('passwordModalBack'),minhaNovaSenha=$('minhaNovaSenha'),minhaNovaSenhaConfirmar=$('minhaNovaSenhaConfirmar'),minhaSenhaMsg=$('minhaSenhaMsg'),minhaSenhaSave=$('minhaSenhaSave');
 const accountsManageBack=$('accountsManageBack'),accountsBody=$('accountsBody'),accountsManageMsg=$('accountsManageMsg'),reportModalBack=$('reportModalBack'),reportTitle=$('reportTitle'),reportNote=$('reportNote'),reportSummary=$('reportSummary'),reportHead=$('reportHead'),reportBody=$('reportBody'),rfc=$('rfc'),rconta=$('rconta'),rfs=$('rfs'),rft=$('rft'),rfb=$('rfb');
 const configModalBack=$('configModalBack'),configTitle=$('configTitle'),configSubtitle=$('configSubtitle'),configHint=$('configHint'),configMsg=$('configMsg'),configHead=$('configHead'),configBody=$('configBody'),configNewBtn=$('configNewBtn'),configEditBack=$('configEditBack'),configEditTitle=$('configEditTitle'),configEditSubtitle=$('configEditSubtitle'),configEditId=$('configEditId'),configEditLabel=$('configEditLabel'),configEditNome=$('configEditNome'),configEditNote=$('configEditNote'),configEditMsg=$('configEditMsg'),configEditSave=$('configEditSave'),configCategoriaField=$('configCategoriaField'),configEditCategoria=$('configEditCategoria');
 let configAtual='postos',configCache=[];
@@ -1519,6 +1545,61 @@ async function login(){
 }
 async function logout(){await sb.auth.signOut();}
 async function trocarUsuario(){await sb.auth.signOut();}
+
+function abrirMinhaSenha(){
+  if(!usuarioAtual) return erro(null,'Sua sessão não está disponível. Entre novamente.');
+  minhaNovaSenha.value='';
+  minhaNovaSenhaConfirmar.value='';
+  minhaSenhaMsg.textContent='';
+  minhaSenhaSave.disabled=false;
+  minhaSenhaSave.textContent='Alterar Senha';
+  passwordModalBack.classList.remove('hidden');
+  setTimeout(()=>minhaNovaSenha.focus(),50);
+}
+
+function fecharMinhaSenha(){
+  passwordModalBack.classList.add('hidden');
+  minhaNovaSenha.value='';
+  minhaNovaSenhaConfirmar.value='';
+  minhaSenhaMsg.textContent='';
+}
+
+async function salvarMinhaSenha(){
+  const nova=minhaNovaSenha.value;
+  const confirmar=minhaNovaSenhaConfirmar.value;
+  minhaSenhaMsg.textContent='';
+
+  if(!nova||!confirmar){
+    minhaSenhaMsg.textContent='Informe e confirme a nova senha.';
+    return;
+  }
+  if(nova.length<6){
+    minhaSenhaMsg.textContent='A senha deve ter pelo menos 6 caracteres.';
+    return;
+  }
+  if(nova!==confirmar){
+    minhaSenhaMsg.textContent='As senhas não coincidem.';
+    return;
+  }
+
+  minhaSenhaSave.disabled=true;
+  minhaSenhaSave.textContent='Alterando...';
+  try{
+    const {error}=await sb.auth.updateUser({password:nova});
+    if(error) throw error;
+    fecharMinhaSenha();
+    sucesso('Senha alterada com sucesso.');
+  }catch(x){
+    minhaSenhaMsg.textContent=x?.message||'Não foi possível alterar a senha.';
+  }finally{
+    minhaSenhaSave.disabled=false;
+    minhaSenhaSave.textContent='Alterar Senha';
+  }
+}
+
+[minhaNovaSenha,minhaNovaSenhaConfirmar].forEach(el=>el?.addEventListener('keydown',ev=>{
+  if(ev.key==='Enter'){ev.preventDefault();salvarMinhaSenha();}
+}));
 
 async function iniciarSistema(){
   esconderLogin();
