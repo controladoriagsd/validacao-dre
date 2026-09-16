@@ -353,7 +353,7 @@ tr:hover td{
     border-color:#6ee7b7
 }
 
-.status-REGISTRADO{
+.status-{
     background:#dcfce7;
     color:#15803d;
     border-color:#86efac
@@ -976,7 +976,18 @@ main.container{padding-top:6px !important;}
 #report .card strong{font-size:16px !important;}
 #report .card span{font-size:8px !important;}
 .taskdrop .danger-item{color:#b42318 !important;}
-</style>
+
+/* Ajustes compactos V7: status/departamento ocupam apenas o necessário; resultado recebe o espaço liberado */
+.status-select{width:auto;min-width:112px;max-width:132px;padding:3px 22px 3px 7px;font-size:11px;}
+.departamento-select{width:auto;min-width:78px;max-width:96px;padding:3px 20px 3px 6px;font-size:11px;}
+.resultado-cell{min-width:260px;width:260px;}
+.resultado-cell .resultado-text{max-width:100%;}
+
+td select.status, td select.departamento-select{width:auto;min-width:0;}
+td select.status{width:108px;min-width:108px;max-width:108px;font-size:10px;padding:3px 16px 3px 5px;}
+td select.departamento-select{width:82px;min-width:82px;max-width:82px;font-size:10px;padding:3px 14px 3px 5px;}
+td.result-cell{min-width:260px;width:260px;}
+''</style>
 <style>
 .report-filters{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .report-filter-field{display:flex;flex-direction:column;gap:3px;min-width:145px}
@@ -1440,7 +1451,7 @@ let configAtual='postos',configCache=[];
 let relatorioAtual='geral',relatorioRows=[];
 let perfilAtual='',usuarioAtual=null,usuariosCache=[];
 
-const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','AGUARDANDO RETORNO','VALIDADO','AJUSTADO','REGISTRADO'];
+const STATUS_LIST=['PENDENTE','EM VALIDAÇÃO','VALIDADO','AJUSTADO'];
 const TIPOS_LIST=['Validação','Observação','Ajuste','Financeiro','Validar departamento'];
 const DEPARTAMENTOS_FINANCEIRO=['LOJA','GERAL','PISTA'];
 
@@ -1541,7 +1552,7 @@ async function carregarConfiguracoes(){
       sb.from('config_tipos').select('id,nome,ativo,ordem,sistema').eq('ativo',true).order('ordem').order('nome')
     ]);
     if(s.error||t.error) throw (s.error||t.error);
-    const nomesStatus=(s.data||[]).map(x=>x.nome).filter(Boolean);
+    const nomesStatus=(s.data||[]).map(x=>x.nome).filter(x=>STATUS_LIST.includes(x));
     const nomesTipos=(t.data||[]).map(x=>x.nome).filter(Boolean);
     D.status=nomesStatus.length?nomesStatus:STATUS_LIST.slice();
     D.tipos=nomesTipos.length?nomesTipos:TIPOS_LIST.slice();
@@ -1751,7 +1762,7 @@ function renderRelatorio(){
   reportTitle.textContent='Relatório de Validação DRE';
   reportNote.textContent=perfilAtual==='FINANCEIRO' ? 'Os dados exibidos respeitam as permissões do perfil Financeiro.' : 'Relatório considerando os filtros selecionados e os registros disponíveis para o seu perfil.';
   const z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]=(z[r.status]||0)+1);
-  reportSummary.innerHTML=`<div class="report-summary"><div class="card"><strong>${a.length}</strong><span>TOTAL</span></div><div class="card"><strong>${z.PENDENTE||0}</strong><span>PENDENTE</span></div><div class="card"><strong>${z['EM VALIDAÇÃO']||0}</strong><span>EM VALIDAÇÃO</span></div><div class="card"><strong>${z['AGUARDANDO RETORNO']||0}</strong><span>AGUARDANDO RETORNO</span></div><div class="card"><strong>${z.VALIDADO||0}</strong><span>VALIDADO</span></div><div class="card"><strong>${z.AJUSTADO||0}</strong><span>AJUSTADO</span></div></div>`;
+  reportSummary.innerHTML=`<div class="report-summary"><div class="card"><strong>${a.length}</strong><span>TOTAL</span></div><div class="card"><strong>${z.PENDENTE||0}</strong><span>PENDENTE</span></div><div class="card"><strong>${z['EM VALIDAÇÃO']||0}</strong><span>EM VALIDAÇÃO</span></div><div class="card"><strong>${z['']||0}</strong><span></span></div><div class="card"><strong>${z.VALIDADO||0}</strong><span>VALIDADO</span></div><div class="card"><strong>${z.AJUSTADO||0}</strong><span>AJUSTADO</span></div></div>`;
   reportHead.innerHTML='<tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>O que validar / Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>';
   reportBody.innerHTML=a.length?a.map(r=>`<tr><td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td>${e(r.tipo)}</td><td>${e(r.departamento||'-')}</td><td>${e(r.observacao||'-')}</td><td>${e(r.valor||'-')}</td><td>${e(r.resultado||'-')}</td><td>${e(r.status)}</td></tr>`).join(''):'<tr><td colspan="9"><div class="empty">Nenhum registro encontrado.</div></td></tr>';
 }
@@ -1878,7 +1889,7 @@ function compararRegistros(a,b,campo){const va=a[campo]??'',vb=b[campo]??'';if(c
 function converterDataParaNumero(valor){const partes=String(valor||'').match(/(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?/);if(!partes)return 0;return new Date(Number(partes[3]),Number(partes[2])-1,Number(partes[1]),Number(partes[4]||0),Number(partes[5]||0)).getTime();}
 function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','departamento','observacao','resultado','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
 function normalizarValorParaInput(valor){if(valor===null||valor===undefined||valor==='')return '';let n=Number(String(valor).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:'';}
-function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],['VALIDADO',z.VALIDADO],['AJUSTADO',z.AJUSTADO]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div></div>`;}
+function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE||0],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']||0],['VALIDADO',z.VALIDADO||0],['AJUSTADO',z.AJUSTADO||0]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div></div>`;}
 
 function limparFormularioUsuario(){
   uId.value='';uNome.value='';uUsername.value='';uSenha.value='';uPerfil.value='VALIDADOR';uAtivo.value='true';
@@ -2048,7 +2059,7 @@ function limpar(){fs.value='';ft.value='';fb.value='';render();}
 
 function exp(t){let a=D.registros.filter(r=>r.competencia===mes);if(!a.length)return erro(null,'Não há validações nessa competência.');if(t==='pdf')return exportarPdfLocal(a);exportarExcelLocal(a);}
 function exportarPdfLocal(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');let titulo='Relatório de Validação DRE — '+fmt(mes);w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(titulo)+'</title><style>body{font:12px Arial,sans-serif;color:#172033;padding:28px}h1{margin:0 0 4px;font-size:22px}h2{margin:0 0 18px;font-size:16px}p{margin:0 0 16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cfd6df;padding:7px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}.status{font-weight:700}.pendente{background:#fee2e2}.validado,.ajustado,.registrado{background:#dcfce7}.validacao{background:#dbeafe}.aguardando{background:#ffedd5}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><thead><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>O que validar / Observação</th><th>Resultado</th><th>Status</th></tr></thead><tbody>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td class="status '+classeStatusImpressao(r.status)+'">'+e(r.status)+'</td></tr>').join('')+'</tbody></table></body></html>');w.document.close();w.focus();setTimeout(()=>{w.print();sucesso('Relatório aberto para salvar como PDF.');},250);}
-function classeStatusImpressao(s){return s==='PENDENTE'?'pendente':s==='VALIDADO'?'validado':s==='AJUSTADO'?'ajustado':s==='REGISTRADO'?'registrado':s==='AGUARDANDO RETORNO'?'aguardando':'validacao';}
+function classeStatusImpressao(s){return s==='PENDENTE'?'pendente':s==='VALIDADO'?'validado':s==='AJUSTADO'?'ajustado':s===''?'registrado':s===''?'aguardando':'validacao';}
 function exportarExcelLocal(a){let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('');let htmlExcel='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>O que validar / Observação</th><th>Valor Envolvido</th><th>Resultado da Validação</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',htmlExcel],{type:'application/vnd.ms-excel;charset=utf-8'});let url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download='Relatorio_Validacao_DRE_'+mes+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Arquivo Excel gerado.');}
 function imprimir(){let a=D.registros.filter(r=>r.competencia===mes),w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para imprimir.');w.document.write('<html><head><title>Relatório DRE</title><style>body{font:12px Arial;padding:25px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left}th{background:#eee}</style></head><body><h1>GRUPO SÃO DOMINGOS</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Observação</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.print();}
 function fmt(c){let p=c.split('-'),m=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];return p.length==2?(m[+p[1]]||p[1])+'/'+p[0]:c;}
