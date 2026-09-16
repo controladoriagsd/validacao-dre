@@ -953,6 +953,18 @@ tbody tr:last-child td{border-bottom:0 !important;}
 .config-tabs{display:flex;background:#edf2f6;border-bottom:1px solid #ccd7e0;padding:0 12px}.config-tabs button{border:0;border-right:1px solid #d3dde5;background:transparent;color:#2b4a61;font-weight:700;font-size:11px;padding:10px 14px;cursor:pointer}.config-tabs button.active{background:#fff;color:#0b5688;border-bottom:2px solid #0b6fa8}
 .config-body{padding:12px;background:#eef2f5;overflow:auto;flex:1;min-height:0}.config-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:7px;color:#607588;font-size:11px}.config-list{background:#fff;border:1px solid #cfd9e2;overflow:auto}.config-list table{width:100%;border-collapse:collapse;min-width:600px}.config-list th{background:#e7edf2;color:#36536a;text-align:left;font-size:10px;text-transform:uppercase;padding:8px;border-bottom:1px solid #c8d4de}.config-list td{padding:8px;border-bottom:1px solid #e1e7ec;color:#243f55;font-size:12px}.config-list tr:last-child td{border-bottom:0}.config-list tr:hover td{background:#f7fafc}.config-actions{display:flex;gap:5px}.config-badge{display:inline-block;padding:3px 7px;border-radius:3px;background:#e6f1f7;color:#0b5688;font-size:10px;font-weight:800}.config-badge.off{background:#f1f3f5;color:#78899a}.config-edit-modal{width:min(500px,100%)}.config-subtitle,.config-edit-note{font-size:10px;color:#718294;margin-top:2px}.config-edit-note{margin-top:10px;line-height:1.4}.config-modal .userhead,.config-edit-modal .account-head{flex-shrink:0}
 @media(max-width:900px){.filterbar{margin:0 10px 10px;flex-wrap:wrap}.filter-title{min-width:100%;padding-bottom:2px}.filter-field{flex:1 1 150px}.filter-search{flex:1 1 240px}}
+
+/* Ajustes solicitados: interface mais compacta, sem alterar a estrutura funcional. */
+main.container{padding-top:6px !important;}
+.filterbar{margin-bottom:5px !important;}
+.monthbar{padding-top:2px !important;padding-bottom:4px !important;margin-bottom:5px !important;}
+#report{margin-bottom:8px !important;}
+#report .ptitle{min-height:38px !important;}
+#report .cards{padding:4px 8px !important;gap:4px !important;}
+#report .card{padding:4px !important;}
+#report .card strong{font-size:16px !important;}
+#report .card span{font-size:8px !important;}
+.taskdrop .danger-item{color:#b42318 !important;}
 </style>
 </head>
 
@@ -964,7 +976,6 @@ tbody tr:last-child td{border-bottom:0 !important;}
         <h1>Validação DRE</h1>
     </div>
 
-    <div style="display:flex;align-items:center;gap:6px"><button class="btn secondary hidden" id="usersBtn" onclick="abrirUsuarios()">Usuários</button><button class="logout-btn" onclick="logout()">Sair</button></div>
 </header>
 
 <nav class="taskbar" id="taskbar">
@@ -989,6 +1000,14 @@ tbody tr:last-child td{border-bottom:0 !important;}
       <button onclick="abrirRelatorios('geral');fecharTaskMenus()">Relatório Geral DRE</button>
       <button onclick="abrirRelatorios('departamento');fecharTaskMenus()">Validações de Departamento</button>
       <button onclick="abrirRelatorios('financeiro');fecharTaskMenus()">Validações Financeiro Geral</button>
+    </div>
+  </div>
+  <div class="taskmenu" id="sistemaMenu">
+    <button class="taskbtn" onclick="toggleTaskMenu('sistemaMenu')">Sistema ▾</button>
+    <div class="taskdrop">
+      <button id="criarUsuarioMenuItem" class="admin-config-item" onclick="abrirUsuarios();fecharTaskMenus()">Criar usuário</button>
+      <button onclick="trocarUsuario();fecharTaskMenus()">Trocar de usuário</button>
+      <button class="danger-item" onclick="logout();fecharTaskMenus()">Sair</button>
     </div>
   </div>
 </nav>
@@ -1365,7 +1384,7 @@ let ordenacao={campo:null,direcao:1};
 const $=id=>document.getElementById(id);
 const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),months=$('months'),report=$('report'),body=$('body'),count=$('count');
 const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),departamentoField=$('departamentoField'),departamento=$('departamento'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
-const userModalBack=$('userModalBack'),usersBtn=$('usersBtn'),newValidationBtn=null,usersBody=$('usersBody'),userFormTitle=$('userFormTitle'),uId=$('uId'),uNome=$('uNome'),uUsername=$('uUsername'),uSenha=$('uSenha'),uPerfil=$('uPerfil'),uAtivo=$('uAtivo'),uSaveBtn=$('uSaveBtn'),userMsg=$('userMsg');
+const userModalBack=$('userModalBack'),newValidationBtn=null,usersBody=$('usersBody'),userFormTitle=$('userFormTitle'),uId=$('uId'),uNome=$('uNome'),uUsername=$('uUsername'),uSenha=$('uSenha'),uPerfil=$('uPerfil'),uAtivo=$('uAtivo'),uSaveBtn=$('uSaveBtn'),userMsg=$('userMsg');
 const accountModalBack=$('accountModalBack'),novaContaNome=$('novaContaNome'),novaContaSave=$('novaContaSave'),novaContaMsg=$('novaContaMsg');
 const accountsManageBack=$('accountsManageBack'),accountsBody=$('accountsBody'),accountsManageMsg=$('accountsManageMsg'),reportModalBack=$('reportModalBack'),reportTitle=$('reportTitle'),reportNote=$('reportNote'),reportSummary=$('reportSummary'),reportHead=$('reportHead'),reportBody=$('reportBody');
 const configModalBack=$('configModalBack'),configTitle=$('configTitle'),configSubtitle=$('configSubtitle'),configHint=$('configHint'),configMsg=$('configMsg'),configHead=$('configHead'),configBody=$('configBody'),configNewBtn=$('configNewBtn'),configEditBack=$('configEditBack'),configEditTitle=$('configEditTitle'),configEditSubtitle=$('configEditSubtitle'),configEditId=$('configEditId'),configEditLabel=$('configEditLabel'),configEditNome=$('configEditNome'),configEditNote=$('configEditNote'),configEditMsg=$('configEditMsg'),configEditSave=$('configEditSave'),configCategoriaField=$('configCategoriaField'),configEditCategoria=$('configEditCategoria');
@@ -1440,6 +1459,7 @@ async function login(){
   btn.textContent='Entrar';
 }
 async function logout(){await sb.auth.signOut();}
+async function trocarUsuario(){await sb.auth.signOut();}
 
 async function iniciarSistema(){
   esconderLogin();
@@ -1452,9 +1472,10 @@ async function iniciarSistema(){
       if(perfilError) throw perfilError;
       perfilAtual=perfilData?.ativo?String(perfilData.perfil||'').toUpperCase():'';
     }
-    usersBtn.classList.toggle('hidden',perfilAtual!=='ADMIN');
-  
-  document.getElementById('cadastroMenu').classList.toggle('hidden',!['ADMIN','VALIDADOR'].includes(perfilAtual));document.querySelectorAll('.admin-config-item').forEach(x=>x.classList.toggle('hidden',perfilAtual!=='ADMIN'));document.getElementById('operacoesMenu').classList.toggle('hidden',!['ADMIN','VALIDADOR'].includes(perfilAtual));
+    document.getElementById('cadastroMenu').classList.toggle('hidden',!['ADMIN','VALIDADOR'].includes(perfilAtual));
+    document.querySelectorAll('.admin-config-item').forEach(x=>x.classList.toggle('hidden',perfilAtual!=='ADMIN'));
+    document.getElementById('operacoesMenu').classList.toggle('hidden',!['ADMIN','VALIDADOR'].includes(perfilAtual));
+    document.getElementById('criarUsuarioMenuItem').classList.toggle('hidden',perfilAtual!=='ADMIN');
     await carregarConfiguracoes();
     const {data:postosData,error:postosError}=await sb.from('postos').select('id,nome,categoria,ativo').eq('ativo',true).order('categoria').order('nome');
     if(postosError) throw postosError;
@@ -1727,7 +1748,7 @@ function compararRegistros(a,b,campo){const va=a[campo]??'',vb=b[campo]??'';if(c
 function converterDataParaNumero(valor){const partes=String(valor||'').match(/(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?/);if(!partes)return 0;return new Date(Number(partes[3]),Number(partes[2])-1,Number(partes[1]),Number(partes[4]||0),Number(partes[5]||0)).getTime();}
 function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','departamento','observacao','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
 function normalizarValorParaInput(valor){if(valor===null||valor===undefined||valor==='')return '';let n=Number(String(valor).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:'';}
-function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],['VALIDADO',z.VALIDADO],['AJUSTADO',z.AJUSTADO]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div><div style="padding:0 14px 14px;text-align:right"><button class="btn secondary" onclick="exp('pdf')">Exportar PDF</button><button class="btn secondary" onclick="exp('excel')">Exportar Excel</button><button class="btn secondary" onclick="imprimir()">Imprimir</button></div></div>`;}
+function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],['VALIDADO',z.VALIDADO],['AJUSTADO',z.AJUSTADO]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div></div>`;}
 
 function limparFormularioUsuario(){
   uId.value='';uNome.value='';uUsername.value='';uSenha.value='';uPerfil.value='VALIDADOR';uAtivo.value='true';
