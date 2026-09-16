@@ -854,7 +854,8 @@ main.container{max-width:none;padding:14px 20px 8px;}
   color:#244963 !important;
   box-shadow:none !important;
   font-weight:700 !important;
-  font-size:12px !important;
+  font-size:10px !important;
+  padding:6px 9px !important;
 }
 .monthbar button.active{background:#103f6b !important;color:#fff !important;border-color:#103f6b !important;}
 
@@ -1578,8 +1579,21 @@ async function salvarItemConfig(){
   try{
     if(configAtual==='postos'){
       const categoria=(configEditCategoria.value||'POSTO').trim()||'POSTO';
-      if(editId){const {error}=await sb.from('postos').update({nome,categoria}).eq('id',editId);if(error)throw error;}else{const {error}=await sb.from('postos').insert({nome,categoria,ativo:true});if(error)throw error;}
-      fecharConfigEdit();await recarregarPostosSistema();carregarConfigModal('postos');sucesso(editId?'Posto atualizado.':'Posto cadastrado.');return;
+      if(editId){
+        const {data:postoAtualizado,error}=await sb.from('postos').update({nome,categoria}).eq('id',editId).select('id,nome,categoria,ativo').single();
+        if(error)throw error;
+        if(!postoAtualizado)throw new Error('O posto não foi atualizado no banco de dados.');
+      }else{
+        const {error}=await sb.from('postos').insert({nome,categoria,ativo:true});
+        if(error)throw error;
+      }
+      fecharConfigEdit();
+      await recarregarPostosSistema();
+      await carregarDados();
+      carregarConfigModal('postos');
+      render();
+      sucesso(editId?'Posto atualizado.':'Posto cadastrado.');
+      return;
     }
     const tabela=configAtual==='status'?'config_status':'config_tipos';
     if(editId){
