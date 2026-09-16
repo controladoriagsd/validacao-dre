@@ -899,6 +899,16 @@ tbody td{
 tbody tr:hover td{background:#f7fafc;}
 tbody tr:last-child td{border-bottom:0 !important;}
 
+.account-combobox{position:relative;display:flex;align-items:center;width:100%;}
+.account-combobox input{width:100%;padding-right:38px !important;}
+.combo-arrow{position:absolute;right:1px;top:1px;height:calc(100% - 2px);width:34px;border:0;background:transparent;color:#234760;font-size:16px;cursor:pointer;border-radius:0 6px 6px 0;}
+.account-dropdown{position:absolute;z-index:1200;left:0;right:0;top:calc(100% + 3px);background:#fff;border:1px solid #bfcdd8;border-radius:6px;box-shadow:0 10px 24px rgba(10,35,55,.16);max-height:250px;overflow:auto;}
+.account-dropdown.hidden{display:none;}
+.account-option{padding:9px 11px;font-size:12px;color:#173d59;cursor:pointer;border-bottom:1px solid #edf1f4;}
+.account-option:hover{background:#f2f6f9;}
+.account-option.create{font-weight:700;color:#00689d;background:#f7fafc;position:sticky;top:0;z-index:1;}
+.account-option.empty{color:#7b8792;cursor:default;}
+
 .status,.departamento-select{
   min-height:32px !important;
   border-radius:5px !important;
@@ -1109,8 +1119,11 @@ main.container{padding-top:6px !important;}
 
                     <div class="field">
                         <label>Conta DRE *</label>
-                        <div style="display:flex;gap:6px;align-items:center">
-                            <select id="conta" required style="flex:1"></select>
+                        <div class="account-combobox" id="contaCombo">
+                            <input id="conta" type="text" required autocomplete="off" placeholder="Pesquisar conta DRE..."
+                                   onfocus="abrirDropdownContas()" oninput="filtrarContasDropdown()">
+                            <button type="button" class="combo-arrow" onclick="alternarDropdownContas(event)">⌄</button>
+                            <div class="account-dropdown hidden" id="contaDropdown"></div>
                         </div>
                     </div>
 
@@ -1155,12 +1168,12 @@ main.container{padding-top:6px !important;}
                     </div>
 
 
-                    <div class="field hidden" id="departamentoField">
+                    <div class="field" id="departamentoField">
 
-                        <label>Departamento *</label>
+                        <label>Departamento</label>
 
                         <select id="departamento">
-                            <option value="">Selecione...</option>
+                            <option value="">Não informado</option>
                             <option value="LOJA">LOJA</option>
                             <option value="GERAL">GERAL</option>
                             <option value="PISTA">PISTA</option>
@@ -1520,15 +1533,28 @@ async function carregarContas(){
   D.contas=(data||[]).map(x=>({id:x.id,nome:x.nome||'',ativo:x.ativo!==false,criadoEm:formatarDataSupabase(x.criado_em)}));
 }
 
+function normalizarBusca(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR').trim();}
 function renderContaOptions(valorAtual=''){
   const atual=valorAtual||conta.value||'';
-  conta.innerHTML='<option value="">Selecione a conta DRE...</option>'+
-    D.contas.map(c=>`<option value="${ea(c.nome)}">${e(c.nome)}</option>`).join('')+
-    '';
-  if(D.contas.some(c=>c.nome===atual)) conta.value=atual;
-  else conta.value='';
+  conta.value=atual;
+  renderDropdownContas(atual);
 }
-
+function renderDropdownContas(termo=''){
+  const dd=$('contaDropdown');
+  if(!dd)return;
+  const q=normalizarBusca(termo);
+  const lista=D.contas.filter(c=>normalizarBusca(c.nome).includes(q));
+  dd.innerHTML='<div class="account-option create" onclick="criarContaPeloDropdown(event)">＋ Criar nova conta</div>' +
+    (lista.length?lista.map(c=>`<div class="account-option" data-nome="${ea(c.nome)}" onclick="selecionarContaDropdown(event,this)">${e(c.nome)}</div>`).join(''):
+    '<div class="account-option empty">Nenhuma conta encontrada.</div>');
+}
+function abrirDropdownContas(){renderDropdownContas(conta.value);$('contaDropdown').classList.remove('hidden');}
+function fecharDropdownContas(){$('contaDropdown')?.classList.add('hidden');}
+function alternarDropdownContas(ev){ev?.stopPropagation();const dd=$('contaDropdown');if(dd.classList.contains('hidden'))abrirDropdownContas();else fecharDropdownContas();}
+function filtrarContasDropdown(){renderDropdownContas(conta.value);$('contaDropdown').classList.remove('hidden');}
+function selecionarContaDropdown(ev,el){ev.stopPropagation();conta.value=el.dataset.nome||'';fecharDropdownContas();}
+function criarContaPeloDropdown(ev){ev.stopPropagation();fecharDropdownContas();abrirNovaConta();}
+document.addEventListener('click',ev=>{if(!ev.target.closest('#contaCombo'))fecharDropdownContas();});
 
 function fecharTaskMenus(){document.querySelectorAll('.taskmenu.open').forEach(x=>x.classList.remove('open'));}
 function toggleTaskMenu(id){const el=$(id),aberto=el.classList.contains('open');fecharTaskMenus();if(!aberto)el.classList.add('open');}
@@ -1781,9 +1807,9 @@ function render(){
   a.forEach(r=>{
     let tr=document.createElement('tr');
     let cl=r.tipo==='Observação'?'bo':r.tipo==='Ajuste'?'ba':r.tipo==='Validar departamento'?'bd':'bv';
-    const podeEditarDepartamento=['FINANCEIRO','ADMIN'].includes(perfilAtual) && r.tipo==='Validar departamento';
+    const podeEditarDepartamento=['FINANCEIRO','ADMIN','VALIDADOR'].includes(perfilAtual);
     const departamentoHtml=podeEditarDepartamento
-      ? `<select class="status departamento-select" onchange="dep('${ej(r.id)}',this.value,this)">${DEPARTAMENTOS_FINANCEIRO.map(d=>`<option value="${e(d)}" ${d===r.departamento?'selected':''}>${e(d)}</option>`).join('')}</select>`
+      ? `<select class="status departamento-select" onchange="dep('${ej(r.id)}',this.value,this)"><option value="">-</option>${DEPARTAMENTOS_FINANCEIRO.map(d=>`<option value="${e(d)}" ${d===r.departamento?'selected':''}>${e(d)}</option>`).join('')}</select>`
       : e(r.departamento||'-');
     const acoes='<button class="small" onclick="editar(\''+ej(r.id)+'\')">Editar</button>'+(perfilAtual==='ADMIN'?'<button class="small danger" onclick="del(\''+ej(r.id)+'\')">Excluir</button>':'');
     const podeEditarStatus=!['CONSULTA'].includes(perfilAtual);
@@ -1879,20 +1905,16 @@ async function alterarSenhaUsuario(idUsuario){
 }
 
 function atualizarDepartamento(){
-  const usaDepartamento=['Financeiro','Validar departamento'].includes(tipo.value);
-  departamentoField.classList.toggle('hidden',!usaDepartamento);
-  departamento.required=usaDepartamento;
-  if(!usaDepartamento){
-    departamento.value='';
-    return;
-  }
-  if(!DEPARTAMENTOS_FINANCEIRO.includes(departamento.value)) departamento.value='';
+  // Departamento é informativo e opcional para todos os tipos.
+  departamentoField.classList.remove('hidden');
+  departamento.required=false;
+  if(departamento.value && !DEPARTAMENTOS_FINANCEIRO.includes(departamento.value)) departamento.value='';
 }
 
 function nova(){if(!['ADMIN','VALIDADOR'].includes(perfilAtual))return erro(null,'Seu perfil não possui acesso para criar validações.');limparForm();comp.value=mes||novoMes();tipo.value=D.tipos.includes('Validação')?'Validação':(D.tipos[0]||'');status.value=D.status.includes('PENDENTE')?'PENDENTE':(D.status[0]||'');atualizarDepartamento();renderContaOptions();mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
 function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
 function selPostos(){let a=[...picker.querySelectorAll('input:checked')].map(x=>x.value);selected.textContent=a.length?a.join(' / '):'Nenhum posto selecionado.';}
-function limparForm(){form.reset();id.value='';departamento.value='';departamentoField.classList.add('hidden');departamento.required=false;renderContaOptions();picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
+function limparForm(){form.reset();id.value='';departamento.value='';departamentoField.classList.remove('hidden');departamento.required=false;renderContaOptions();picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
 
 async function salvar(ev){
   ev.preventDefault();
@@ -1901,10 +1923,11 @@ async function salvar(ev){
   if(!conta.value.trim())return erro(null,'Selecione a conta DRE.');
   const valorNumero=valor.value===''?null:Number(valor.value);
   if(valor.value!==''&&!Number.isFinite(valorNumero))return erro(null,'Informe um valor válido.');
-  const usaDepartamento=['Financeiro','Validar departamento'].includes(tipo.value);
-  const departamentoValor=usaDepartamento?departamento.value:null;
-  if(usaDepartamento&&!DEPARTAMENTOS_FINANCEIRO.includes(departamentoValor))return erro(null,'Selecione o departamento: LOJA, GERAL ou PISTA.');
-  const dados={id:id.value,competencia:comp.value,conta:conta.value.trim(),tipo:tipo.value,departamento:departamentoValor,observacao:obs.value.trim(),valor_envolvido:valorNumero,resultado:resultado.value.trim(),status:status.value};
+  const departamentoValor=departamento.value&&DEPARTAMENTOS_FINANCEIRO.includes(departamento.value)?departamento.value:null;
+  const contaSelecionada=D.contas.some(c=>normalizarBusca(c.nome)===normalizarBusca(conta.value));
+  if(!contaSelecionada)return erro(null,"Selecione uma conta DRE da lista ou use '＋ Criar nova conta'.");
+  const contaOficial=D.contas.find(c=>normalizarBusca(c.nome)===normalizarBusca(conta.value))?.nome||conta.value.trim();
+  const dados={id:id.value,competencia:comp.value,conta:contaOficial,tipo:tipo.value,departamento:departamentoValor,observacao:obs.value.trim(),valor_envolvido:valorNumero,resultado:resultado.value.trim(),status:status.value};
   save.disabled=true;save.textContent='Salvando...';
   try{
     let validacaoId=dados.id;
@@ -1943,14 +1966,20 @@ async function st(id,novoStatus,el){
 }
 async function dep(id,novoDepartamento,el){
   const r=D.registros.find(x=>x.id===id);
-  if(!r || !['FINANCEIRO','ADMIN'].includes(perfilAtual) || r.tipo!=='Validar departamento')return;
+  if(!r || !['FINANCEIRO','ADMIN','VALIDADOR'].includes(perfilAtual))return;
   const anterior=r.departamento||'';
-  if(!DEPARTAMENTOS_FINANCEIRO.includes(novoDepartamento)){if(el)el.value=anterior;return erro(null,'Selecione LOJA, GERAL ou PISTA.');}
+  if(novoDepartamento && !DEPARTAMENTOS_FINANCEIRO.includes(novoDepartamento)){if(el)el.value=anterior;return erro(null,'Departamento inválido.');}
   if(el)el.disabled=true;
   try{
-    const {data,error}=await sb.rpc('atualizar_departamento_financeiro',{p_validacao_id:id,p_departamento:novoDepartamento});
-    if(error)throw error;
-    if(!data?.sucesso)throw new Error(data?.erro||'Não foi possível alterar o departamento.');
+    let data=null,error=null;
+    if(perfilAtual==='FINANCEIRO'){
+      ({data,error}=await sb.rpc('atualizar_departamento_validacao',{p_validacao_id:id,p_departamento:novoDepartamento||null}));
+      if(error)throw error;
+      if(!data?.sucesso)throw new Error(data?.erro||'Não foi possível alterar o departamento.');
+    }else{
+      ({error}=await sb.from('validacoes').update({departamento:novoDepartamento||null,atualizado_em:new Date().toISOString()}).eq('id',id));
+      if(error)throw error;
+    }
     await carregarDados();competencias();render();sucesso('Departamento atualizado.');
   }catch(x){
     if(el)el.value=anterior;
