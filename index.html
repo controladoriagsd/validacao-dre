@@ -977,6 +977,22 @@ main.container{padding-top:6px !important;}
 #report .card span{font-size:8px !important;}
 .taskdrop .danger-item{color:#b42318 !important;}
 </style>
+<style>
+.report-filters{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.report-filter-field{display:flex;flex-direction:column;gap:3px;min-width:145px}
+.report-filter-field label{font-size:9px;font-weight:800;color:#5c7184;text-transform:uppercase}
+.report-filter-field select,.report-filter-field input{height:32px;padding:6px 9px;border:1px solid #c8d4de;border-radius:4px;background:#fff;color:#244963;font-size:11px}
+.report-filter-search{min-width:220px;flex:1}
+.report-clear{height:32px;padding:6px 10px !important;font-size:11px !important}
+.report-export-actions{display:flex;gap:5px;margin-left:auto}
+.report-export-actions .btn{height:32px;padding:6px 10px !important;font-size:11px !important}
+.icon-action{width:28px;height:28px;padding:0;border:1px solid #cbd6df;background:#fff;border-radius:4px;color:#183f5c;font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.icon-action:hover{background:#eef4f8}
+.icon-action.danger{color:#b42318}
+.icon-action.danger:hover{background:#fff1f0}
+.actions{display:flex;gap:4px;align-items:center}
+.result-cell{max-width:260px;white-space:normal;line-height:1.35}
+</style>
 </head>
 
 <body>
@@ -1008,9 +1024,7 @@ main.container{padding-top:6px !important;}
   <div class="taskmenu" id="relatoriosMenu">
     <button class="taskbtn" onclick="toggleTaskMenu('relatoriosMenu')">Relatórios ▾</button>
     <div class="taskdrop">
-      <button onclick="abrirRelatorios('geral');fecharTaskMenus()">Relatório Geral DRE</button>
-      <button onclick="abrirRelatorios('departamento');fecharTaskMenus()">Validações de Departamento</button>
-      <button onclick="abrirRelatorios('financeiro');fecharTaskMenus()">Validações Financeiro Geral</button>
+      <button onclick="abrirRelatorios();fecharTaskMenus()">Relatório de Validação DRE</button>
     </div>
   </div>
   <div class="taskmenu" id="sistemaMenu">
@@ -1051,8 +1065,6 @@ main.container{padding-top:6px !important;}
 
 <main class="container">
 
-    <div class="monthbar" id="months"></div>
-
     <section id="report"></section>
 
     <section class="panel">
@@ -1075,6 +1087,7 @@ main.container{padding-top:6px !important;}
                         <th class="sortable" onclick="ordenarPor('departamento')">Departamento <span id="sort-departamento"></span></th>
                         <th class="sortable" onclick="ordenarPor('observacao')">O que validar / Observação <span id="sort-observacao"></span></th>
                         <th class="sortable" onclick="ordenarPor('status')">Status <span id="sort-status"></span></th>
+                        <th class="sortable" onclick="ordenarPor('resultado')">Resultado da Validação <span id="sort-resultado"></span></th>
                         <th class="sortable" onclick="ordenarPor('atualizadoEm')">Atualizado <span id="sort-atualizadoEm"></span></th>
                         <th>Ações</th>
                     </tr>
@@ -1348,13 +1361,33 @@ main.container{padding-top:6px !important;}
       <button class="close" onclick="fecharRelatorios()">×</button>
     </div>
     <div class="report-body">
-      <div class="report-tools">
-        <button class="btn secondary" id="reportBtnGeral" onclick="renderRelatorio('geral')">Geral DRE</button>
-        <button class="btn secondary" id="reportBtnDepartamento" onclick="renderRelatorio('departamento')">Validações de Departamento</button>
-        <button class="btn secondary" id="reportBtnFinanceiro" onclick="renderRelatorio('financeiro')">Financeiro Geral</button>
-        <button class="btn secondary" onclick="exportarRelatorioAtual('excel')">Exportar Excel</button>
-        <button class="btn secondary" onclick="exportarRelatorioAtual('pdf')">Exportar PDF</button>
-        <button class="btn secondary" onclick="imprimirRelatorioAtual()">Imprimir</button>
+      <div class="report-tools report-filters">
+        <div class="report-filter-field">
+          <label for="rfc">Competência</label>
+          <select id="rfc" onchange="renderRelatorio()"></select>
+        </div>
+        <div class="report-filter-field">
+          <label for="rconta">Conta DRE</label>
+          <input id="rconta" type="text" autocomplete="off" placeholder="Pesquisar conta..." oninput="renderRelatorio()">
+        </div>
+        <div class="report-filter-field">
+          <label for="rfs">Status</label>
+          <select id="rfs" onchange="renderRelatorio()"></select>
+        </div>
+        <div class="report-filter-field">
+          <label for="rft">Tipo</label>
+          <select id="rft" onchange="renderRelatorio()"></select>
+        </div>
+        <div class="report-filter-field report-filter-search">
+          <label for="rfb">Buscar</label>
+          <input id="rfb" type="text" autocomplete="off" placeholder="Posto, observação, resultado..." oninput="renderRelatorio()">
+        </div>
+        <button class="btn secondary report-clear" onclick="limparFiltrosRelatorio()">Limpar</button>
+        <div class="report-export-actions">
+          <button class="btn secondary" onclick="exportarRelatorioAtual('excel')">Excel</button>
+          <button class="btn secondary" onclick="exportarRelatorioAtual('pdf')">PDF</button>
+          <button class="btn secondary" onclick="imprimirRelatorioAtual()">Imprimir</button>
+        </div>
       </div>
       <div class="report-note" id="reportNote"></div>
       <div id="reportSummary"></div>
@@ -1397,11 +1430,11 @@ let D={registros:[],postos:[],status:[],tipos:[],contas:[]},mes='';
 let ordenacao={campo:null,direcao:1};
 
 const $=id=>document.getElementById(id);
-const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),months=$('months'),report=$('report'),body=$('body'),count=$('count');
+const fc=$('fc'),fs=$('fs'),ft=$('ft'),fb=$('fb'),report=$('report'),body=$('body'),count=$('count');
 const modal=$('modal'),form=$('form'),mtitle=$('mtitle'),picker=$('picker'),selected=$('selected'),id=$('id'),comp=$('comp'),conta=$('conta'),tipo=$('tipo'),departamentoField=$('departamentoField'),departamento=$('departamento'),status=$('status'),obs=$('obs'),valor=$('valor'),resultado=$('resultado'),save=$('save'),toast=$('toast');
 const userModalBack=$('userModalBack'),newValidationBtn=null,usersBody=$('usersBody'),userFormTitle=$('userFormTitle'),uId=$('uId'),uNome=$('uNome'),uUsername=$('uUsername'),uSenha=$('uSenha'),uPerfil=$('uPerfil'),uAtivo=$('uAtivo'),uSaveBtn=$('uSaveBtn'),userMsg=$('userMsg');
 const accountModalBack=$('accountModalBack'),novaContaNome=$('novaContaNome'),novaContaSave=$('novaContaSave'),novaContaMsg=$('novaContaMsg'),contaModalTitle=$('contaModalTitle'),contaEditId=$('contaEditId');
-const accountsManageBack=$('accountsManageBack'),accountsBody=$('accountsBody'),accountsManageMsg=$('accountsManageMsg'),reportModalBack=$('reportModalBack'),reportTitle=$('reportTitle'),reportNote=$('reportNote'),reportSummary=$('reportSummary'),reportHead=$('reportHead'),reportBody=$('reportBody');
+const accountsManageBack=$('accountsManageBack'),accountsBody=$('accountsBody'),accountsManageMsg=$('accountsManageMsg'),reportModalBack=$('reportModalBack'),reportTitle=$('reportTitle'),reportNote=$('reportNote'),reportSummary=$('reportSummary'),reportHead=$('reportHead'),reportBody=$('reportBody'),rfc=$('rfc'),rconta=$('rconta'),rfs=$('rfs'),rft=$('rft'),rfb=$('rfb');
 const configModalBack=$('configModalBack'),configTitle=$('configTitle'),configSubtitle=$('configSubtitle'),configHint=$('configHint'),configMsg=$('configMsg'),configHead=$('configHead'),configBody=$('configBody'),configNewBtn=$('configNewBtn'),configEditBack=$('configEditBack'),configEditTitle=$('configEditTitle'),configEditSubtitle=$('configEditSubtitle'),configEditId=$('configEditId'),configEditLabel=$('configEditLabel'),configEditNome=$('configEditNome'),configEditNote=$('configEditNote'),configEditMsg=$('configEditMsg'),configEditSave=$('configEditSave'),configCategoriaField=$('configCategoriaField'),configEditCategoria=$('configEditCategoria');
 let configAtual='postos',configCache=[];
 let relatorioAtual='geral',relatorioRows=[];
@@ -1675,27 +1708,50 @@ async function excluirConta(idConta){
     sucesso('Conta DRE excluída do cadastro ativo.');
   }catch(x){erro(x,'Não foi possível excluir a conta.');}
 }
-function abrirRelatorios(tipoRelatorio='geral'){
+function abrirRelatorios(){
   reportModalBack.classList.remove('hidden');
-  renderRelatorio(tipoRelatorio);
+  prepararFiltrosRelatorio();
+  renderRelatorio();
 }
 function fecharRelatorios(){reportModalBack.classList.add('hidden');}
-function renderRelatorio(tipoRelatorio='geral'){
-  relatorioAtual=tipoRelatorio;
-  const titulo=tipoRelatorio==='departamento'?'Relatório de Validações de Departamento':tipoRelatorio==='financeiro'?'Relatório de Validações Financeiro Geral':'Relatório Geral de Validação DRE';
-  reportTitle.textContent=titulo;
-  document.querySelectorAll('#reportModalBack .report-tools .btn').forEach(b=>b.classList.remove('active'));
-  const mapa={geral:'reportBtnGeral',departamento:'reportBtnDepartamento',financeiro:'reportBtnFinanceiro'};$(mapa[tipoRelatorio]).classList.add('active');
-  let a=D.registros.filter(r=>{
-    if(tipoRelatorio==='departamento')return r.tipo==='Validar departamento';
-    if(tipoRelatorio==='financeiro')return r.tipo==='Financeiro'||r.tipo==='Validar departamento';
-    return true;
-  });
+function prepararFiltrosRelatorio(){
+  const atualComp=$('rfc') ? $('rfc').value : '';
+  const atualStatus=$('rfs') ? $('rfs').value : '';
+  const atualTipo=$('rft') ? $('rft').value : '';
+  const comps=[...new Set(D.registros.map(r=>r.competencia).filter(Boolean))].sort().reverse();
+  rfc.innerHTML='<option value="">Todas</option>'+comps.map(x=>`<option value="${ea(x)}">${e(fmt(x))}</option>`).join('');
+  rfs.innerHTML='<option value="">Todos</option>'+D.status.map(x=>`<option value="${ea(x)}">${e(x)}</option>`).join('');
+  const tiposRelatorio=perfilAtual==='FINANCEIRO' ? D.tipos.filter(x=>x==='Financeiro'||x==='Validar departamento') : D.tipos;
+  rft.innerHTML='<option value="">Todos</option>'+tiposRelatorio.map(x=>`<option value="${ea(x)}">${e(x)}</option>`).join('');
+  if([...rfc.options].some(o=>o.value===atualComp))rfc.value=atualComp;
+  if([...rfs.options].some(o=>o.value===atualStatus))rfs.value=atualStatus;
+  if([...rft.options].some(o=>o.value===atualTipo))rft.value=atualTipo;
+}
+function limparFiltrosRelatorio(){
+  rfc.value='';
+  rconta.value='';
+  rfs.value='';
+  rft.value='';
+  rfb.value='';
+  renderRelatorio();
+}
+function renderRelatorio(){
+  prepararFiltrosRelatorio();
+  let a=D.registros.slice();
+  if(perfilAtual==='FINANCEIRO') a=a.filter(r=>r.tipo==='Financeiro'||r.tipo==='Validar departamento');
+  if(rfc.value)a=a.filter(r=>r.competencia===rfc.value);
+  if(rfs.value)a=a.filter(r=>r.status===rfs.value);
+  if(rft.value)a=a.filter(r=>r.tipo===rft.value);
+  const qConta=normalizarBusca(rconta.value);
+  const qBusca=normalizarBusca(rfb.value);
+  if(qConta)a=a.filter(r=>normalizarBusca(r.conta).includes(qConta));
+  if(qBusca)a=a.filter(r=>[r.conta,r.posto,r.tipo,r.departamento,r.observacao,r.resultado,r.status].map(normalizarBusca).join(' ').includes(qBusca));
   a=a.slice().sort((x,y)=>String(y.competencia).localeCompare(String(x.competencia))||String(y.atualizadoEm).localeCompare(String(x.atualizadoEm)));
   relatorioRows=a;
-  reportNote.textContent=perfilAtual==='FINANCEIRO'?'Os dados exibidos respeitam as permissões do perfil Financeiro.':'Relatório considerando os registros disponíveis para o seu perfil.';
+  reportTitle.textContent='Relatório de Validação DRE';
+  reportNote.textContent=perfilAtual==='FINANCEIRO' ? 'Os dados exibidos respeitam as permissões do perfil Financeiro.' : 'Relatório considerando os filtros selecionados e os registros disponíveis para o seu perfil.';
   const z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]=(z[r.status]||0)+1);
-  reportSummary.innerHTML=`<div class="report-summary"><div class="card"><strong>${a.length}</strong><span>TOTAL</span></div><div class="card"><strong>${z.PENDENTE||0}</strong><span>PENDENTE</span></div><div class="card"><strong>${z['AGUARDANDO RETORNO']||0}</strong><span>AGUARDANDO RETORNO</span></div><div class="card"><strong>${z.VALIDADO||0}</strong><span>VALIDADO</span></div></div>`;
+  reportSummary.innerHTML=`<div class="report-summary"><div class="card"><strong>${a.length}</strong><span>TOTAL</span></div><div class="card"><strong>${z.PENDENTE||0}</strong><span>PENDENTE</span></div><div class="card"><strong>${z['EM VALIDAÇÃO']||0}</strong><span>EM VALIDAÇÃO</span></div><div class="card"><strong>${z['AGUARDANDO RETORNO']||0}</strong><span>AGUARDANDO RETORNO</span></div><div class="card"><strong>${z.VALIDADO||0}</strong><span>VALIDADO</span></div><div class="card"><strong>${z.AJUSTADO||0}</strong><span>AJUSTADO</span></div></div>`;
   reportHead.innerHTML='<tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>O que validar / Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>';
   reportBody.innerHTML=a.length?a.map(r=>`<tr><td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td>${e(r.tipo)}</td><td>${e(r.departamento||'-')}</td><td>${e(r.observacao||'-')}</td><td>${e(r.valor||'-')}</td><td>${e(r.resultado||'-')}</td><td>${e(r.status)}</td></tr>`).join(''):'<tr><td colspan="9"><div class="empty">Nenhum registro encontrado.</div></td></tr>';
 }
@@ -1794,7 +1850,7 @@ function opcoes(){
 function postos(){picker.innerHTML=D.postos.map(p=>`<label><input type="checkbox" value="${ea(p)}" onchange="selPostos()"> ${e(p)}</label>`).join('');}
 function selecionarTodosPostos(){picker.querySelectorAll('input').forEach(x=>x.checked=true);selPostos();}
 function limparPostos(){picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
-function competencias(){let a=[...new Set(D.registros.map(r=>r.competencia).filter(Boolean))].sort().reverse();if(!a.length)a=[novoMes()];if(!mes||!a.includes(mes))mes=a[0];fc.innerHTML=a.map(x=>`<option value="${ea(x)}">${e(fmt(x))}</option>`).join('');fc.value=mes;months.innerHTML=a.map(x=>`<button class="month ${x==mes?'active':''}" onclick="mes='${ej(x)}';competencias();render()">${e(fmt(x))}</button>`).join('');}
+function competencias(){let a=[...new Set(D.registros.map(r=>r.competencia).filter(Boolean))].sort().reverse();if(!a.length)a=[novoMes()];if(!mes||!a.includes(mes))mes=a[0];fc.innerHTML=a.map(x=>`<option value="${ea(x)}">${e(fmt(x))}</option>`).join('');fc.value=mes;}
 
 function render(){
   mes=fc.value||mes;let a=D.registros.filter(r=>r.competencia===mes);
@@ -1803,7 +1859,7 @@ function render(){
   if(q)a=a.filter(r=>[r.conta,r.posto,r.tipo,r.observacao,r.resultado,r.status].join(' ').toLowerCase().includes(q));
   if(ordenacao.campo)a.sort((x,y)=>compararRegistros(x,y,ordenacao.campo)*ordenacao.direcao);
   atualizarIndicadoresOrdenacao();relatorio();body.innerHTML='';count.textContent=a.length+' registro(s)';
-  if(!a.length){body.innerHTML='<tr><td colspan="8"><div class="empty">Nenhuma validação encontrada.</div></td></tr>';return;}
+  if(!a.length){body.innerHTML='<tr><td colspan="10"><div class="empty">Nenhuma validação encontrada.</div></td></tr>';return;}
   a.forEach(r=>{
     let tr=document.createElement('tr');
     let cl=r.tipo==='Observação'?'bo':r.tipo==='Ajuste'?'ba':r.tipo==='Validar departamento'?'bd':'bv';
@@ -1811,16 +1867,16 @@ function render(){
     const departamentoHtml=podeEditarDepartamento
       ? `<select class="status departamento-select" onchange="dep('${ej(r.id)}',this.value,this)"><option value="">-</option>${DEPARTAMENTOS_FINANCEIRO.map(d=>`<option value="${e(d)}" ${d===r.departamento?'selected':''}>${e(d)}</option>`).join('')}</select>`
       : e(r.departamento||'-');
-    const acoes='<button class="small" onclick="editar(\''+ej(r.id)+'\')">Editar</button>'+(perfilAtual==='ADMIN'?'<button class="small danger" onclick="del(\''+ej(r.id)+'\')">Excluir</button>':'');
+    const acoes='<button type="button" class="icon-action" title="Editar validação" aria-label="Editar validação" onclick="editar(\''+ej(r.id)+'\')">✎</button>'+(perfilAtual==='ADMIN'?'<button type="button" class="icon-action danger" title="Excluir validação" aria-label="Excluir validação" onclick="del(\''+ej(r.id)+'\')">🗑</button>':'');
     const podeEditarStatus=!['CONSULTA'].includes(perfilAtual);
-    tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${departamentoHtml}</td><td>${e(r.observacao||'-')}</td><td><select class="status status-${r.status.replace(/ /g,'-')}" ${podeEditarStatus?'':'disabled'} onchange="st('${ej(r.id)}',this.value,this)">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions">${acoes}</div></td>`;
+    tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${departamentoHtml}</td><td>${e(r.observacao||'-')}</td><td><select class="status status-${r.status.replace(/ /g,'-')}" ${podeEditarStatus?'':'disabled'} onchange="st('${ej(r.id)}',this.value,this)">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td class="result-cell">${e(r.resultado||'-')}</td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions">${acoes}</div></td>`;
     body.appendChild(tr);
   });
 }
 function ordenarPor(campo){if(ordenacao.campo===campo)ordenacao.direcao*=-1;else{ordenacao.campo=campo;ordenacao.direcao=1;}render();}
 function compararRegistros(a,b,campo){const va=a[campo]??'',vb=b[campo]??'';if(campo==='atualizadoEm')return converterDataParaNumero(va)-converterDataParaNumero(vb);return String(va).localeCompare(String(vb),'pt-BR',{numeric:true,sensitivity:'base'});}
 function converterDataParaNumero(valor){const partes=String(valor||'').match(/(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?/);if(!partes)return 0;return new Date(Number(partes[3]),Number(partes[2])-1,Number(partes[1]),Number(partes[4]||0),Number(partes[5]||0)).getTime();}
-function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','departamento','observacao','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
+function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','departamento','observacao','resultado','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
 function normalizarValorParaInput(valor){if(valor===null||valor===undefined||valor==='')return '';let n=Number(String(valor).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:'';}
 function relatorio(){let a=D.registros.filter(r=>r.competencia===mes),z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]++);report.innerHTML=`<div class="panel"><div class="ptitle"><span>Relatório de Validação DRE — ${e(fmt(mes))}</span><span>${a.length} registro(s)</span></div><div class="cards">${[['TOTAL',a.length],['PENDENTE',z.PENDENTE],['EM VALIDAÇÃO',z['EM VALIDAÇÃO']],['AGUARDANDO RETORNO',z['AGUARDANDO RETORNO']],['VALIDADO',z.VALIDADO],['AJUSTADO',z.AJUSTADO]].map(x=>`<div class="card"><strong>${x[1]}</strong><span>${e(x[0])}</span></div>`).join('')}</div></div>`;}
 
