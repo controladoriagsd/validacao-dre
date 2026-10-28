@@ -1731,6 +1731,197 @@ body:not(.login-mode) footer.app-footer {
 }
 
 </style>
+
+<style id="v16-richtext-analytics-fonts">
+/* V16: leitura ligeiramente maior e editor de texto formatado nos dois campos de validação. */
+body:not(.login-mode) .filter-title strong { font-size:13px !important; }
+body:not(.login-mode) .filter-field label { font-size:10.5px !important; }
+body:not(.login-mode) .filter-field select,
+body:not(.login-mode) .filter-field input,
+body:not(.login-mode) .search-control input { font-size:12px !important; }
+body:not(.login-mode) .filter-clear { font-size:12px !important; }
+body:not(.login-mode) .mini-kpi-period { font-size:10px !important; }
+body:not(.login-mode) .mini-kpi-item b { font-size:13px !important; }
+body:not(.login-mode) .mini-kpi-item small { font-size:9px !important; }
+body:not(.login-mode) main.container .ptitle .ptitle-label { font-size:13px !important; }
+body:not(.login-mode) main.container .ptitle #count { font-size:10px !important; }
+body:not(.login-mode) main.container .tablewrap thead th { font-size:11px !important; line-height:1.3 !important; padding:10px 11px !important; }
+body:not(.login-mode) main.container .tablewrap tbody td { font-size:12.5px !important; line-height:1.45 !important; }
+body:not(.login-mode) main.container .tablewrap td .status { font-size:11.5px !important; }
+body:not(.login-mode) main.container .tablewrap td .icon-action { font-size:14px !important; }
+
+/* Editor rico, com armazenamento no mesmo campo texto existente do Supabase. */
+.rich-field { grid-column:1 / -1; min-width:0; }
+#form .grid > .field.full.rich-field { margin-top:8px; }
+.rich-editor-shell { border:1px solid #cbd7e1; border-radius:10px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(16,42,60,.025); }
+.rich-editor-shell:focus-within { border-color:#3890c1; box-shadow:0 0 0 3px rgba(56,144,193,.12); }
+.rich-toolbar { display:flex; align-items:center; gap:5px; flex-wrap:wrap; padding:7px 9px; background:#f7fafc; border-bottom:1px solid #e0e8ef; }
+.rich-tool { display:inline-flex; align-items:center; justify-content:center; min-width:32px; height:32px; padding:0 8px; border:1px solid transparent; border-radius:6px; background:transparent; color:#29475c; cursor:pointer; font-size:14px; font-weight:800; line-height:1; }
+.rich-tool:hover,.rich-tool:focus-visible { background:#e8f3fa; border-color:#c5ddeb; outline:none; color:#075b8d; }
+.rich-tool b,.rich-tool i { font-size:16px; }
+.rich-tool u { font-size:15px; text-underline-offset:2px; }
+.rich-tool s { font-size:15px; text-decoration-thickness:2px; }
+.rich-list-tool { font-size:16px; }
+.rich-clear-tool { font-size:13px; color:#627588; }
+.rich-toolbar-separator { height:22px; width:1px; background:#d7e1e9; margin:0 3px; }
+.rich-editable { min-height:126px; max-height:280px; overflow:auto; padding:12px 13px; outline:none; color:#243b4d; font-size:13px; font-weight:400; line-height:1.6; white-space:normal; overflow-wrap:anywhere; }
+.rich-editable:empty:before { content:attr(data-placeholder); color:#9aaab8; pointer-events:none; }
+.rich-editable p,.rich-editable div { margin:0 0 6px; }
+.rich-editable ul,.rich-editable ol { margin:5px 0; padding-left:24px; }
+.rich-editable li { margin:2px 0; }
+.rich-hint { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; padding-top:4px; color:#8191a0; font-size:11px; line-height:1.45; }
+.rich-hint b { font-weight:800; color:#657b8d; }
+.rich-storage { display:none !important; }
+.rich-cell { min-width:210px; max-width:360px; white-space:normal; overflow-wrap:anywhere; }
+.rich-display { white-space:normal; overflow-wrap:anywhere; line-height:1.5; color:inherit; }
+.rich-display p,.rich-display div { margin:0 0 5px; }
+.rich-display p:last-child,.rich-display div:last-child { margin-bottom:0; }
+.rich-display ul,.rich-display ol { margin:4px 0; padding-left:20px; }
+.rich-display li { margin:2px 0; }
+.rich-display strong,.rich-display b { font-weight:800; color:#20394d; }
+.rich-display em,.rich-display i { color:#435e73; }
+.rich-display s,.rich-display strike,.rich-display del { text-decoration:line-through; }
+td.result-cell { min-width:260px; width:260px; max-width:380px; }
+
+/* Tela de Análises Gráficas: só visualiza dados já carregados pelo sistema. */
+body.dashboard-mode section.filterbar,
+body.dashboard-mode main.container { display:none !important; }
+.dashboard-screen { display:none; color:#183b55; }
+body.dashboard-mode #dashboardScreen {
+  display:block !important; flex:1 1 auto !important; min-height:0 !important;
+  overflow:auto !important; width:100%; max-width:none; margin:0; padding:17px 18px 26px;
+}
+body.dashboard-mode footer.app-footer { flex-basis:18px !important; }
+.dashboard-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin:0 0 16px; }
+.dashboard-title-group { min-width:0; }
+.dashboard-kicker { display:block; color:#0872b3; font-size:10px; font-weight:800; letter-spacing:1.1px; margin-bottom:4px; }
+.dashboard-heading h2 { margin:0; font-size:24px; line-height:1.2; color:#123a59; }
+.dashboard-heading p { margin:6px 0 0; color:#718397; font-size:12px; }
+.dashboard-controls { display:flex; align-items:flex-end; gap:8px; flex:0 0 auto; }
+.dashboard-controls label { display:flex; flex-direction:column; gap:5px; color:#60758a; font-size:11px; font-weight:700; }
+.dashboard-controls select { height:36px; min-width:190px; border:1px solid #d3dee8; border-radius:7px; background:#fff; padding:0 10px; color:#24445e; font-size:12px; }
+.dashboard-back { height:36px; padding:0 13px; border:1px solid #cbd8e3; border-radius:7px; background:#fff; color:#1b5d87; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.dashboard-back:hover { background:#f1f7fb; }
+.dash-kpi-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:10px; }
+.dash-kpi { min-height:102px; padding:14px 16px; background:#fff; border:1px solid #e0e8ef; border-radius:11px; box-shadow:0 3px 12px rgba(18,52,78,.035); border-top:3px solid #8da8bc; }
+.dash-kpi span { display:block; color:#6b8092; font-size:12px; font-weight:700; }
+.dash-kpi strong { display:block; margin:7px 0 4px; color:#173b57; font-size:29px; line-height:1; letter-spacing:-.6px; }
+.dash-kpi small { color:#8494a3; font-size:11px; }
+.dash-kpi.total { border-top-color:#1575b8; }
+.dash-kpi.open { border-top-color:#d97706; }
+.dash-kpi.done { border-top-color:#16834a; }
+.dash-kpi.adjusted { border-top-color:#7c3aed; }
+.dash-secondary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
+.dash-metric { display:flex; align-items:flex-start; gap:11px; min-height:92px; padding:13px 15px; background:#fff; border:1px solid #e0e8ef; border-radius:10px; }
+.dash-metric-icon { display:flex; align-items:center; justify-content:center; flex:0 0 36px; width:36px; height:36px; border-radius:9px; background:#eaf4fb; color:#176da3; font-size:22px; }
+.dash-metric span { display:block; color:#60768a; font-size:12px; font-weight:700; }
+.dash-metric strong { display:block; margin:5px 0; color:#163b56; font-size:20px; line-height:1.1; }
+.dash-metric small { display:block; color:#8493a2; font-size:11px; line-height:1.45; }
+.dash-unavailable { background:#fbfcfd; border-style:dashed; }
+.dash-unavailable .dash-metric-icon { background:#f1f3f5; color:#7a8793; }
+.dash-unavailable strong { font-size:15px; color:#6b7784; }
+.dash-charts-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:12px; }
+.dash-panel { min-width:0; background:#fff; border:1px solid #e0e8ef; border-radius:10px; box-shadow:0 3px 12px rgba(18,52,78,.03); }
+.dash-panel-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 15px 10px; border-bottom:1px solid #edf1f4; }
+.dash-panel-heading h3 { margin:0; color:#193d58; font-size:14px; }
+.dash-panel-heading p { margin:4px 0 0; color:#8191a0; font-size:11px; }
+.dash-panel-tag { padding:4px 7px; border-radius:5px; background:#edf5fa; color:#386987; font-size:10px; white-space:nowrap; }
+.dash-chart-list { padding:11px 15px 14px; }
+.dash-bar-row { margin-bottom:13px; }
+.dash-bar-row:last-child { margin-bottom:0; }
+.dash-bar-label { display:flex; align-items:center; gap:7px; margin-bottom:6px; color:#526b7f; font-size:12px; }
+.dash-bar-label span:first-child:not(.dash-status-dot) { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dash-bar-label b { color:#1b3e59; font-size:12px; }
+.dash-status-dot { width:8px; height:8px; border-radius:50%; flex:0 0 8px; }
+.dash-status-dot.pendente { background:#d97706; }
+.dash-status-dot.em-validacao { background:#287ac1; }
+.dash-status-dot.validado { background:#16834a; }
+.dash-status-dot.ajustado { background:#7c3aed; }
+.dash-status-dot.outro { background:#8293a3; }
+.dash-bar-track { height:8px; width:100%; overflow:hidden; border-radius:99px; background:#eef2f5; }
+.dash-bar-fill { display:block; height:100%; min-width:0; border-radius:99px; background:#8297a9; }
+.dash-bar-fill.pendente { background:#d97706; }
+.dash-bar-fill.em-validacao { background:#287ac1; }
+.dash-bar-fill.validado { background:#16834a; }
+.dash-bar-fill.ajustado { background:#7c3aed; }
+.dash-bar-fill.outro { background:#8293a3; }
+.dash-bar-fill.age { background:#287ac1; }
+.dash-bar-fill.tipo { background:#4d7e9d; }
+.dash-bar-fill.resolution { background:#16834a; }
+.dash-oldest .dash-panel-heading { padding-bottom:12px; }
+.dash-table-wrap { overflow:auto; }
+.dash-table-wrap table { width:100%; border-collapse:collapse; min-width:500px; }
+.dash-table-wrap th { padding:10px 13px; text-align:left; color:#718497; background:#f8fafc; font-size:10px; text-transform:uppercase; letter-spacing:.45px; }
+.dash-table-wrap td { padding:10px 13px; border-top:1px solid #edf1f4; color:#405b70; font-size:12px; }
+.dash-table-wrap td strong { display:block; color:#183b55; font-size:12px; }
+.dash-table-wrap td small { display:block; color:#8291a0; margin-top:3px; font-size:11px; }
+.dash-status-pill { display:inline-block; padding:4px 7px; border-radius:5px; font-size:10px; font-weight:800; white-space:nowrap; }
+.dash-status-pill.pendente { background:#fff2df; color:#9a5b05; }
+.dash-status-pill.em-validacao { background:#e8f3ff; color:#1d6095; }
+.dash-status-pill.validado { background:#e7f7ed; color:#17663b; }
+.dash-status-pill.ajustado { background:#f2eafe; color:#6d36a5; }
+.dash-status-pill.outro { background:#eef2f5; color:#536677; }
+.dash-data-note { margin-top:12px; padding:12px 14px; border:1px solid #d9e6ef; border-radius:8px; background:#f5f9fc; color:#607589; font-size:11px; line-height:1.6; }
+.dash-data-note strong { color:#234a66; }
+.dash-data-note code { font-size:11px; color:#0d5d91; }
+.dash-empty { margin:0; padding:10px 0; color:#8996a3; font-size:12px; }
+.dash-goal-pill { display:inline-block; padding:4px 7px; border-radius:5px; background:#e7f7ed; color:#17663b; font-size:10px; font-weight:800; }
+.dash-goal-pill.warning { background:#fff2df; color:#9a5b05; }
+.dash-legend { display:flex; gap:12px; flex-wrap:wrap; padding:0 15px 12px; color:#6f8190; font-size:11px; }
+.dash-legend span { display:inline-flex; align-items:center; gap:5px; }
+.dash-legend i { display:inline-block; width:9px; height:9px; border-radius:50%; background:#16834a; }
+@media (max-width:1100px) {
+  .dash-charts-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:820px) {
+  body.dashboard-mode #dashboardScreen { padding:12px 9px 18px; }
+  .dashboard-heading { align-items:stretch; flex-direction:column; gap:10px; margin-bottom:11px; }
+  .dashboard-heading h2 { font-size:21px; }
+  .dashboard-controls { display:grid; grid-template-columns:minmax(0,1fr); align-items:stretch; }
+  .dashboard-controls select,.dashboard-back { width:100%; }
+  .dash-kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .dash-kpi { min-height:86px; padding:11px; }
+  .dash-kpi strong { font-size:24px; }
+  .dash-secondary-grid { grid-template-columns:1fr; gap:7px; }
+  .dash-metric { min-height:0; padding:11px; }
+  .dash-charts-grid { grid-template-columns:1fr; gap:8px; }
+  .rich-hint { align-items:flex-start; }
+}
+@media (max-width:480px) {
+  body:not(.login-mode) .filter-field label { font-size:10px !important; }
+  body:not(.login-mode) main.container .tablewrap thead th { font-size:10px !important; }
+  body:not(.login-mode) main.container .tablewrap tbody td { font-size:12px !important; }
+  .rich-toolbar { gap:3px; padding:6px; }
+  .rich-tool { min-width:29px; height:30px; padding:0 6px; }
+}
+</style>
+
+
+<style id="postos-multiselect-v16-1">
+.postos-combobox{position:relative;width:100%;}
+.postos-trigger{width:100%;min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #c6d2dc;border-radius:8px;background:#fff;color:#234760;text-align:left;font-size:13px;font-weight:500;cursor:pointer;transition:border-color .15s,box-shadow .15s;}
+.postos-trigger:hover{border-color:#8fa8bb;background:#fbfdff;}
+.postos-trigger:focus-visible{outline:3px solid rgba(38,132,190,.18);border-color:#2684be;}
+.postos-trigger-arrow{flex:0 0 auto;color:#61788b;font-size:17px;line-height:1;}
+.postos-dropdown{position:absolute;z-index:1300;top:calc(100% + 5px);left:0;right:0;background:#fff;border:1px solid #c6d2dc;border-radius:10px;box-shadow:0 14px 32px rgba(14,42,64,.18);padding:10px;}
+.postos-dropdown.hidden{display:none!important;}
+.postos-search-wrap{display:flex;align-items:center;gap:8px;border:1px solid #cbd7e1;border-radius:7px;padding:0 10px;color:#72879a;background:#fff;}
+.postos-search-wrap:focus-within{border-color:#2684be;box-shadow:0 0 0 3px rgba(38,132,190,.12);}
+.postos-search-wrap>span{font-size:18px;line-height:1;}
+.postos-search-wrap input{width:100%;min-width:0;min-height:38px;border:0!important;outline:0!important;box-shadow:none!important;padding:7px 0!important;background:transparent!important;font-size:12px!important;color:#173d59;}
+.postos-dropdown-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 1px 8px;color:#718397;font-size:11px;font-weight:700;}
+.postos-dropdown-actions>div{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.postos-dropdown-actions .small{background:#f8fafc;border:1px solid #d4dee7!important;color:#234760!important;}
+.postos-dropdown .picker{display:block;max-height:220px;overflow:auto;border:0;border-top:1px solid #edf1f4;border-radius:0;padding:5px 0 0;margin:0;}
+.postos-dropdown .picker label{display:flex;align-items:center;gap:9px;min-height:36px;padding:7px 9px;border-radius:6px;color:#294a63;font-size:12px;font-weight:500;cursor:pointer;}
+.postos-dropdown .picker label:hover{background:#f2f7fb;}
+.postos-dropdown .picker input[type=checkbox]{flex:0 0 auto;width:16px;height:16px;margin:0;accent-color:#176ea5;}
+.postos-empty{padding:14px 8px;text-align:center;color:#75889a;font-size:12px;}
+.postos-empty.hidden{display:none!important;}
+.selected{margin-top:6px;color:#687d8f;font-size:11px;line-height:1.45;}
+@media(max-width:640px){.postos-dropdown{max-height:65vh;overflow:hidden}.postos-dropdown .picker{max-height:38vh}.postos-dropdown-actions{align-items:flex-start;flex-direction:column}.postos-dropdown-actions>div{justify-content:flex-start}}
+</style>
+
 </head>
 
 <body class="login-mode">
@@ -1771,6 +1962,7 @@ body:not(.login-mode) footer.app-footer {
     <button class="taskbtn" onclick="toggleTaskMenu('relatoriosMenu')">Relatórios ▾</button>
     <div class="taskdrop">
       <button onclick="abrirRelatorios();fecharTaskMenus()">Relatório de Validação DRE</button>
+      <button onclick="abrirIndicadores();fecharTaskMenus()">Análises Gráficas</button>
     </div>
   </div>
   <div class="taskmenu" id="sistemaMenu">
@@ -1783,6 +1975,25 @@ body:not(.login-mode) footer.app-footer {
     </div>
   </div>
 </nav>
+
+<section class="dashboard-screen" id="dashboardScreen" aria-label="Análises gráficas de desempenho">
+  <div class="dashboard-heading">
+    <div class="dashboard-title-group">
+      <span class="dashboard-kicker">ACOMPANHAMENTO GERENCIAL</span>
+      <h2>Análises gráficas de desempenho</h2>
+      <p>Indicadores de resolução, volume, pendências e desempenho das validações DRE.</p>
+    </div>
+    <div class="dashboard-controls">
+      <label for="dashboardCompetencia">Período analisado
+        <select id="dashboardCompetencia" onchange="renderDashboard()">
+          <option value="TODAS">Todas as competências</option>
+        </select>
+      </label>
+      <button type="button" class="dashboard-back" onclick="voltarOperacoes()">← Voltar às validações</button>
+    </div>
+  </div>
+  <div id="dashboardContent"></div>
+</section>
 
 <section class="filterbar" aria-label="Filtros">
   <div class="filter-title"><span class="filter-kicker">CONSULTA</span><strong>Filtros de validação</strong></div>
@@ -1944,33 +2155,29 @@ body:not(.login-mode) footer.app-footer {
 
 
                     <div class="field full">
-
-                        <label>Posto(s) *</label>
-
-                        <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:5px;">
-
-                            <button
-                                type="button"
-                                class="small"
-                                onclick="selecionarTodosPostos()">
-                                Selecionar todos
+                        <label for="postosTrigger">Posto(s) *</label>
+                        <div class="postos-combobox" id="postosCombo">
+                            <button type="button" class="postos-trigger" id="postosTrigger" aria-haspopup="dialog" aria-expanded="false" onclick="alternarDropdownPostos(event)">
+                                <span id="postosTriggerText">Selecione um ou mais postos</span>
+                                <span class="postos-trigger-arrow" aria-hidden="true">⌄</span>
                             </button>
-
-                            <button
-                                type="button"
-                                class="small"
-                                onclick="limparPostos()">
-                                Limpar
-                            </button>
-
+                            <div class="postos-dropdown hidden" id="postosDropdown">
+                                <div class="postos-search-wrap">
+                                    <span aria-hidden="true">⌕</span>
+                                    <input id="postosSearch" type="search" autocomplete="off" placeholder="Buscar posto pelo nome..." oninput="filtrarPostosDropdown()" aria-label="Buscar posto pelo nome">
+                                </div>
+                                <div class="postos-dropdown-actions">
+                                    <span id="postosCountLabel">0 postos</span>
+                                    <div>
+                                        <button type="button" class="small" onclick="selecionarTodosPostos()">Selecionar todos</button>
+                                        <button type="button" class="small" onclick="limparPostos()">Limpar</button>
+                                    </div>
+                                </div>
+                                <div class="picker" id="picker"></div>
+                                <div class="postos-empty hidden" id="postosEmpty">Nenhum posto encontrado.</div>
+                            </div>
                         </div>
-
-                        <div class="picker" id="picker"></div>
-
-                        <div class="selected" id="selected">
-                            Nenhum posto selecionado.
-                        </div>
-
+                        <div class="selected" id="selected">Nenhum posto selecionado.</div>
                     </div>
 
 
@@ -2006,12 +2213,23 @@ body:not(.login-mode) footer.app-footer {
                     </div>
 
 
-                    <div class="field full">
-
-                        <label>O que validar / Observação</label>
-
-                        <textarea id="obs"></textarea>
-
+                    <div class="field full rich-field">
+                        <label for="obsEditor">O que validar / Observação</label>
+                        <div class="rich-editor-shell">
+                            <div class="rich-toolbar" role="toolbar" aria-label="Formatação de O que validar / Observação">
+                                <button type="button" class="rich-tool" title="Negrito (Ctrl+B)" aria-label="Negrito" onmousedown="event.preventDefault()" onclick="executarComandoRich('obsEditor','bold')"><b>B</b></button>
+                                <button type="button" class="rich-tool" title="Itálico (Ctrl+I)" aria-label="Itálico" onmousedown="event.preventDefault()" onclick="executarComandoRich('obsEditor','italic')"><i>I</i></button>
+                                <button type="button" class="rich-tool" title="Sublinhado (Ctrl+U)" aria-label="Sublinhado" onmousedown="event.preventDefault()" onclick="executarComandoRich('obsEditor','underline')"><u>U</u></button>
+                                <button type="button" class="rich-tool" title="Tachado" aria-label="Tachado" onmousedown="event.preventDefault()" onclick="executarComandoRich('obsEditor','strikeThrough')"><s>S</s></button>
+                                <span class="rich-toolbar-separator" aria-hidden="true"></span>
+                                <button type="button" class="rich-tool rich-list-tool" title="Lista com marcadores" aria-label="Lista com marcadores" onmousedown="event.preventDefault()" onclick="executarComandoRich('obsEditor','insertUnorderedList')">☷</button>
+                                <button type="button" class="rich-tool rich-list-tool" title="Lista numerada" aria-label="Lista numerada" onmousedown="event.preventDefault()" onclick="executarComandoRich('obsEditor','insertOrderedList')">1.</button>
+                                <button type="button" class="rich-tool rich-clear-tool" title="Remover formatação" aria-label="Remover formatação" onmousedown="event.preventDefault()" onclick="executarComandoRich('obsEditor','removeFormat')">T×</button>
+                            </div>
+                            <div id="obsEditor" class="rich-editable" contenteditable="true" role="textbox" aria-multiline="true" aria-label="O que validar / Observação" data-placeholder="Descreva o que precisa ser conferido..."></div>
+                            <textarea id="obs" class="rich-storage" aria-hidden="true" tabindex="-1"></textarea>
+                        </div>
+                        <div class="rich-hint"><span><b>Enter</b> cria um parágrafo · <b>Shift+Enter</b> quebra a linha</span><span>Negrito, itálico, tachado, sublinhado e listas</span></div>
                     </div>
 
 
@@ -2024,12 +2242,23 @@ body:not(.login-mode) footer.app-footer {
                     </div>
 
 
-                    <div class="field full">
-
-                        <label>Resultado da Validação</label>
-
-                        <textarea id="resultado"></textarea>
-
+                    <div class="field full rich-field">
+                        <label for="resultadoEditor">Resultado da Validação</label>
+                        <div class="rich-editor-shell">
+                            <div class="rich-toolbar" role="toolbar" aria-label="Formatação do Resultado da Validação">
+                                <button type="button" class="rich-tool" title="Negrito (Ctrl+B)" aria-label="Negrito" onmousedown="event.preventDefault()" onclick="executarComandoRich('resultadoEditor','bold')"><b>B</b></button>
+                                <button type="button" class="rich-tool" title="Itálico (Ctrl+I)" aria-label="Itálico" onmousedown="event.preventDefault()" onclick="executarComandoRich('resultadoEditor','italic')"><i>I</i></button>
+                                <button type="button" class="rich-tool" title="Sublinhado (Ctrl+U)" aria-label="Sublinhado" onmousedown="event.preventDefault()" onclick="executarComandoRich('resultadoEditor','underline')"><u>U</u></button>
+                                <button type="button" class="rich-tool" title="Tachado" aria-label="Tachado" onmousedown="event.preventDefault()" onclick="executarComandoRich('resultadoEditor','strikeThrough')"><s>S</s></button>
+                                <span class="rich-toolbar-separator" aria-hidden="true"></span>
+                                <button type="button" class="rich-tool rich-list-tool" title="Lista com marcadores" aria-label="Lista com marcadores" onmousedown="event.preventDefault()" onclick="executarComandoRich('resultadoEditor','insertUnorderedList')">☷</button>
+                                <button type="button" class="rich-tool rich-list-tool" title="Lista numerada" aria-label="Lista numerada" onmousedown="event.preventDefault()" onclick="executarComandoRich('resultadoEditor','insertOrderedList')">1.</button>
+                                <button type="button" class="rich-tool rich-clear-tool" title="Remover formatação" aria-label="Remover formatação" onmousedown="event.preventDefault()" onclick="executarComandoRich('resultadoEditor','removeFormat')">T×</button>
+                            </div>
+                            <div id="resultadoEditor" class="rich-editable" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Resultado da Validação" data-placeholder="Registre o resultado, a conclusão e as providências..."></div>
+                            <textarea id="resultado" class="rich-storage" aria-hidden="true" tabindex="-1"></textarea>
+                        </div>
+                        <div class="rich-hint"><span><b>Enter</b> cria um parágrafo · <b>Shift+Enter</b> quebra a linha</span><span>Negrito, itálico, tachado, sublinhado e listas</span></div>
                     </div>
 
                 </div>
@@ -2280,6 +2509,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
 });
 
 function mostrarLogin(){
+  document.body.classList.remove('dashboard-mode');
   document.body.classList.add('login-mode');
   $('loginScreen').classList.remove('hidden');
   setTimeout(()=>$('loginUsername').focus(),50);
@@ -2456,7 +2686,7 @@ async function carregarDados(){
   const {data,error}=await sb.from('validacoes').select('id,competencia,conta_dre,tipo,departamento,observacao,valor_envolvido,resultado,status,criado_em,atualizado_em,validacao_postos(posto_id,postos(nome))').order('atualizado_em',{ascending:false});
   if(error) throw error;
   D.registros=(data||[]).map(r=>({
-    id:r.id,competencia:r.competencia||'',conta:r.conta_dre||'',tipo:r.tipo||'Validação',observacao:r.observacao||'',valor:r.valor_envolvido==null?'':String(r.valor_envolvido),resultado:r.resultado||'',status:r.status||'PENDENTE',departamento:r.departamento||'',criadoEm:formatarDataSupabase(r.criado_em),atualizadoEm:formatarDataSupabase(r.atualizado_em),
+    id:r.id,competencia:r.competencia||'',conta:r.conta_dre||'',tipo:r.tipo||'Validação',observacao:r.observacao||'',valor:r.valor_envolvido==null?'':String(r.valor_envolvido),resultado:r.resultado||'',status:r.status||'PENDENTE',departamento:r.departamento||'',criadoEm:formatarDataSupabase(r.criado_em),atualizadoEm:formatarDataSupabase(r.atualizado_em),criadoEmISO:r.criado_em||null,atualizadoEmISO:r.atualizado_em||null,
     posto:(r.validacao_postos||[]).map(v=>v.postos?.nome).filter(Boolean).join(' / ')
   }));
 }
@@ -2489,6 +2719,7 @@ function filtrarContasDropdown(){renderDropdownContas(conta.value);$('contaDropd
 function selecionarContaDropdown(ev,el){ev.stopPropagation();conta.value=el.dataset.nome||'';fecharDropdownContas();}
 function criarContaPeloDropdown(ev){ev.stopPropagation();fecharDropdownContas();abrirNovaConta();}
 document.addEventListener('click',ev=>{if(!ev.target.closest('#contaCombo'))fecharDropdownContas();});
+document.addEventListener('click',ev=>{if(!ev.target.closest('#postosCombo'))fecharDropdownPostos();});
 
 function fecharTaskMenus(){document.querySelectorAll('.taskmenu.open').forEach(x=>x.classList.remove('open'));}
 function toggleTaskMenu(id){const el=$(id),aberto=el.classList.contains('open');fecharTaskMenus();if(!aberto)el.classList.add('open');}
@@ -2646,7 +2877,7 @@ function renderRelatorio(){
   const qConta=normalizarBusca(rconta.value);
   const qBusca=normalizarBusca(rfb.value);
   if(qConta)a=a.filter(r=>normalizarBusca(r.conta).includes(qConta));
-  if(qBusca)a=a.filter(r=>[r.conta,r.posto,r.tipo,r.departamento,r.observacao,r.resultado,r.status].map(normalizarBusca).join(' ').includes(qBusca));
+  if(qBusca)a=a.filter(r=>[r.conta,r.posto,r.tipo,r.departamento,richTextToPlainText(r.observacao),richTextToPlainText(r.resultado),r.status].map(normalizarBusca).join(' ').includes(qBusca));
   a=a.slice().sort((x,y)=>String(y.competencia).localeCompare(String(x.competencia))||String(y.atualizadoEm).localeCompare(String(x.atualizadoEm)));
   relatorioRows=a;
   reportTitle.textContent='Relatório de Validação DRE';
@@ -2654,15 +2885,15 @@ function renderRelatorio(){
   const z={};D.status.forEach(s=>z[s]=0);a.forEach(r=>z[r.status]=(z[r.status]||0)+1);
   reportSummary.innerHTML=`<div class="report-summary"><div class="card"><strong>${a.length}</strong><span>TOTAL</span></div><div class="card"><strong>${z.PENDENTE||0}</strong><span>PENDENTE</span></div><div class="card"><strong>${z['EM VALIDAÇÃO']||0}</strong><span>EM VALIDAÇÃO</span></div><div class="card"><strong>${z['']||0}</strong><span></span></div><div class="card"><strong>${z.VALIDADO||0}</strong><span>VALIDADO</span></div><div class="card"><strong>${z.AJUSTADO||0}</strong><span>AJUSTADO</span></div></div>`;
   reportHead.innerHTML='<tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>O que validar / Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>';
-  reportBody.innerHTML=a.length?a.map(r=>`<tr><td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td>${e(r.tipo)}</td><td>${e(r.departamento||'-')}</td><td>${e(r.observacao||'-')}</td><td>${e(r.valor||'-')}</td><td>${e(r.resultado||'-')}</td><td>${e(r.status)}</td></tr>`).join(''):'<tr><td colspan="9"><div class="empty">Nenhum registro encontrado.</div></td></tr>';
+  reportBody.innerHTML=a.length?a.map(r=>`<tr><td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td>${e(r.tipo)}</td><td>${e(r.departamento||'-')}</td><td>${richTextHtml(r.observacao,'-')}</td><td>${e(r.valor||'-')}</td><td>${richTextHtml(r.resultado,'-')}</td><td>${e(r.status)}</td></tr>`).join(''):'<tr><td colspan="9"><div class="empty">Nenhum registro encontrado.</div></td></tr>';
 }
 function exportarRelatorioAtual(tipo){
   if(!relatorioRows.length)return erro(null,'Não há registros neste relatório.');
   if(tipo==='excel')return exportarRelatorioExcel(relatorioRows);
   exportarRelatorioPdf(relatorioRows);
 }
-function exportarRelatorioExcel(a){const titulo=reportTitle.textContent;let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('');let html='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — '+e(titulo)+'</h2><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'}),url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download=titulo.replace(/[^a-z0-9]+/gi,'_')+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Relatório Excel gerado.');}
-function exportarRelatorioPdf(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(reportTitle.textContent)+'</title><style>body{font:12px Arial;padding:28px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>'+e(reportTitle.textContent)+'</h2><table><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.focus();setTimeout(()=>w.print(),200);}
+function exportarRelatorioExcel(a){const titulo=reportTitle.textContent;let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+richTextHtml(r.observacao,'')+'</td><td>'+e(r.valor)+'</td><td>'+richTextHtml(r.resultado,'')+'</td><td>'+e(r.status)+'</td></tr>').join('');let html='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — '+e(titulo)+'</h2><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'}),url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download=titulo.replace(/[^a-z0-9]+/gi,'_')+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Relatório Excel gerado.');}
+function exportarRelatorioPdf(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(reportTitle.textContent)+'</title><style>body{font:12px Arial;padding:28px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>'+e(reportTitle.textContent)+'</h2><table><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>Observação</th><th>Valor</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+richTextHtml(r.observacao,'')+'</td><td>'+e(r.valor)+'</td><td>'+richTextHtml(r.resultado,'')+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.focus();setTimeout(()=>w.print(),200);}
 function imprimirRelatorioAtual(){exportarRelatorioPdf(relatorioRows);}
 function abrirNovaConta(){
   if(!['ADMIN','VALIDADOR'].includes(perfilAtual))return erro(null,'Seu perfil não possui acesso ao cadastro de contas.');
@@ -2748,18 +2979,32 @@ function opcoes(){
   if([...status.options].some(o=>o.value===statusAtual))status.value=statusAtual;
   if([...tipo.options].some(o=>o.value===tipoAtual))tipo.value=tipoAtual;
 }
-function postos(){picker.innerHTML=D.postos.map(p=>`<label><input type="checkbox" value="${ea(p)}" onchange="selPostos()"> ${e(p)}</label>`).join('');}
-function selecionarTodosPostos(){picker.querySelectorAll('input').forEach(x=>x.checked=true);selPostos();}
-function limparPostos(){picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
+function postos(){
+  picker.innerHTML=D.postos.map(p=>`<label><input type="checkbox" value="${ea(p)}" onchange="selPostos()"><span>${e(p)}</span></label>`).join('');
+  if($('postosSearch'))$('postosSearch').value='';
+  filtrarPostosDropdown();
+  selPostos();
+}
+function abrirDropdownPostos(){const dd=$('postosDropdown');if(!dd)return;dd.classList.remove('hidden');$('postosTrigger')?.setAttribute('aria-expanded','true');filtrarPostosDropdown();}
+function fecharDropdownPostos(){ $('postosDropdown')?.classList.add('hidden');$('postosTrigger')?.setAttribute('aria-expanded','false'); }
+function alternarDropdownPostos(ev){ev?.stopPropagation();const dd=$('postosDropdown');if(!dd)return;if(dd.classList.contains('hidden'))abrirDropdownPostos();else fecharDropdownPostos();}
+function filtrarPostosDropdown(){
+  const q=normalizarBusca($('postosSearch')?.value||'');let visiveis=0;
+  picker?.querySelectorAll('label').forEach(label=>{const mostrar=normalizarBusca(label.textContent).includes(q);label.style.display=mostrar?'flex':'none';if(mostrar)visiveis++;});
+  const empty=$('postosEmpty');if(empty)empty.classList.toggle('hidden',visiveis>0);
+  const countLabel=$('postosCountLabel');if(countLabel)countLabel.textContent=`${visiveis} ${visiveis===1?'posto':'postos'}`;
+}
+function selecionarTodosPostos(){picker.querySelectorAll('input[type="checkbox"]').forEach(x=>x.checked=true);selPostos();}
+function limparPostos(){picker.querySelectorAll('input[type="checkbox"]').forEach(x=>x.checked=false);selPostos();}
 function competencias(){let a=[...new Set(D.registros.map(r=>r.competencia).filter(Boolean))].sort().reverse();if(!a.length)a=[novoMes()];if(!mes||!a.includes(mes))mes=a[0];fc.innerHTML=a.map(x=>`<option value="${ea(x)}">${e(fmt(x))}</option>`).join('');fc.value=mes;}
 
 function render(){
   mes=fc.value||mes;let a=D.registros.filter(r=>r.competencia===mes);
   if(perfilAtual==='FINANCEIRO') a=a.filter(r=>r.tipo==='Financeiro'||r.tipo==='Validar departamento');
   if(fs.value)a=a.filter(r=>r.status===fs.value);if(ft.value)a=a.filter(r=>r.tipo===ft.value);let q=fb.value.toLowerCase().trim();
-  if(q)a=a.filter(r=>[r.conta,r.posto,r.tipo,r.observacao,r.resultado,r.status].join(' ').toLowerCase().includes(q));
+  if(q)a=a.filter(r=>[r.conta,r.posto,r.tipo,richTextToPlainText(r.observacao),richTextToPlainText(r.resultado),r.status].join(' ').toLowerCase().includes(q));
   if(ordenacao.campo)a.sort((x,y)=>compararRegistros(x,y,ordenacao.campo)*ordenacao.direcao);
-  atualizarIndicadoresOrdenacao();relatorio();body.innerHTML='';count.textContent=a.length+' registro(s)';
+  atualizarIndicadoresOrdenacao();relatorio();if(document.body.classList.contains('dashboard-mode'))renderDashboard();body.innerHTML='';count.textContent=a.length+(a.length===1?' registro':' registros');
   if(!a.length){body.innerHTML='<tr><td colspan="10"><div class="empty">Nenhuma validação encontrada.</div></td></tr>';return;}
   a.forEach(r=>{
     let tr=document.createElement('tr');
@@ -2770,12 +3015,12 @@ function render(){
       : e(r.departamento||'-');
     const acoes='<button type="button" class="icon-action" title="Editar validação" aria-label="Editar validação" onclick="editar(\''+ej(r.id)+'\')">✎</button>'+(perfilAtual==='ADMIN'?'<button type="button" class="icon-action danger" title="Excluir validação" aria-label="Excluir validação" onclick="del(\''+ej(r.id)+'\')">🗑</button>':'');
     const podeEditarStatus=!['CONSULTA'].includes(perfilAtual);
-    tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${departamentoHtml}</td><td>${e(r.observacao||'-')}</td><td><select class="status status-${r.status.replace(/ /g,'-')}" ${podeEditarStatus?'':'disabled'} onchange="st('${ej(r.id)}',this.value,this)">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td class="result-cell">${e(r.resultado||'-')}</td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions">${acoes}</div></td>`;
+    tr.innerHTML=`<td>${e(r.competencia)}</td><td><b>${e(r.conta)}</b></td><td>${e(r.posto)}</td><td><span class="badge ${cl}">${e(r.tipo)}</span></td><td>${departamentoHtml}</td><td class="rich-cell"><div class="rich-display">${richTextHtml(r.observacao,'-')}</div></td><td><select class="status status-${r.status.replace(/ /g,'-')}" ${podeEditarStatus?'':'disabled'} onchange="st('${ej(r.id)}',this.value,this)">${D.status.map(s=>`<option value="${e(s)}" ${s===r.status?'selected':''}>${e(s)}</option>`).join('')}</select></td><td class="result-cell rich-cell"><div class="rich-display">${richTextHtml(r.resultado,'-')}</div></td><td>${e(r.atualizadoEm||'-')}</td><td><div class="actions">${acoes}</div></td>`;
     body.appendChild(tr);
   });
 }
 function ordenarPor(campo){if(ordenacao.campo===campo)ordenacao.direcao*=-1;else{ordenacao.campo=campo;ordenacao.direcao=1;}render();}
-function compararRegistros(a,b,campo){const va=a[campo]??'',vb=b[campo]??'';if(campo==='atualizadoEm')return converterDataParaNumero(va)-converterDataParaNumero(vb);return String(va).localeCompare(String(vb),'pt-BR',{numeric:true,sensitivity:'base'});}
+function compararRegistros(a,b,campo){let va=a[campo]??'',vb=b[campo]??'';if(campo==='observacao'||campo==='resultado'){va=richTextToPlainText(va);vb=richTextToPlainText(vb);}if(campo==='atualizadoEm')return converterDataParaNumero(va)-converterDataParaNumero(vb);return String(va).localeCompare(String(vb),'pt-BR',{numeric:true,sensitivity:'base'});}
 function converterDataParaNumero(valor){const partes=String(valor||'').match(/(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2})?:?(\d{2})?/);if(!partes)return 0;return new Date(Number(partes[3]),Number(partes[2])-1,Number(partes[1]),Number(partes[4]||0),Number(partes[5]||0)).getTime();}
 function atualizarIndicadoresOrdenacao(){['competencia','conta','posto','tipo','departamento','observacao','resultado','status','atualizadoEm'].forEach(campo=>{const alvo=$('sort-'+campo);if(alvo)alvo.textContent=ordenacao.campo===campo?(ordenacao.direcao===1?'▲':'▼'):'';});}
 function normalizarValorParaInput(valor){if(valor===null||valor===undefined||valor==='')return '';let n=Number(String(valor).replace(/R\$/gi,'').replace(/\s/g,'').replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:'';}
@@ -2869,12 +3114,20 @@ function atualizarDepartamento(){
 }
 
 function nova(){if(!['ADMIN','VALIDADOR'].includes(perfilAtual))return erro(null,'Seu perfil não possui acesso para criar validações.');limparForm();comp.value=mes||novoMes();tipo.value=D.tipos.includes('Validação')?'Validação':(D.tipos[0]||'');status.value=D.status.includes('PENDENTE')?'PENDENTE':(D.status[0]||'');atualizarDepartamento();renderContaOptions();mtitle.textContent='Criar Nova Validação';modal.classList.remove('hidden');}
-function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
-function selPostos(){let a=[...picker.querySelectorAll('input:checked')].map(x=>x.value);selected.textContent=a.length?a.join(' / '):'Nenhum posto selecionado.';}
-function limparForm(){form.reset();id.value='';departamento.value='';departamentoField.classList.remove('hidden');departamento.required=false;renderContaOptions();picker.querySelectorAll('input').forEach(x=>x.checked=false);selPostos();}
+function editar(id){let r=D.registros.find(x=>x.id==id);if(!r)return;limparForm();document.getElementById('id').value=r.id;comp.value=r.competencia;renderContaOptions(r.conta);conta.value=r.conta;tipo.value=r.tipo;departamento.value=r.departamento||'';obs.value=r.observacao;valor.value=normalizarValorParaInput(r.valor);resultado.value=r.resultado;preencherEditorRich('obsEditor','obs',r.observacao);preencherEditorRich('resultadoEditor','resultado',r.resultado);status.value=r.status;atualizarDepartamento();picker.querySelectorAll('input').forEach(x=>x.checked=r.posto.split(/\s*\/\s*/).includes(x.value));selPostos();mtitle.textContent='Editar Validação';modal.classList.remove('hidden');}
+function selPostos(){
+  const a=[...picker.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value);
+  const triggerText=$('postosTriggerText');
+  if(triggerText)triggerText.textContent=a.length?`${a.length} ${a.length===1?'posto selecionado':'postos selecionados'}`:'Selecione um ou mais postos';
+  if(selected)selected.textContent=a.length?(a.length<=3?a.join(' · '):`${a.slice(0,3).join(' · ')} e mais ${a.length-3}`):'Nenhum posto selecionado.';
+  if($('postosTrigger'))$('postosTrigger').title=a.join(' / ');
+}
+function limparForm(){form.reset();id.value='';departamento.value='';departamentoField.classList.remove('hidden');departamento.required=false;limparEditorRich('obsEditor','obs');limparEditorRich('resultadoEditor','resultado');renderContaOptions();picker.querySelectorAll('input[type="checkbox"]').forEach(x=>x.checked=false);if($('postosSearch'))$('postosSearch').value='';filtrarPostosDropdown();fecharDropdownPostos();selPostos();}
 
 async function salvar(ev){
   ev.preventDefault();
+  sincronizarEditorRich('obsEditor','obs');
+  sincronizarEditorRich('resultadoEditor','resultado');
   const ps=[...picker.querySelectorAll('input:checked')].map(x=>x.value);
   if(!ps.length)return erro(null,'Selecione pelo menos um posto.');
   if(!conta.value.trim())return erro(null,'Selecione a conta DRE.');
@@ -2948,10 +3201,10 @@ function fechar(){modal.classList.add('hidden');}
 function limpar(){fs.value='';ft.value='';fb.value='';render();}
 
 function exp(t){let a=D.registros.filter(r=>r.competencia===mes);if(!a.length)return erro(null,'Não há validações nessa competência.');if(t==='pdf')return exportarPdfLocal(a);exportarExcelLocal(a);}
-function exportarPdfLocal(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');let titulo='Relatório de Validação DRE — '+fmt(mes);w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(titulo)+'</title><style>body{font:12px Arial,sans-serif;color:#172033;padding:28px}h1{margin:0 0 4px;font-size:22px}h2{margin:0 0 18px;font-size:16px}p{margin:0 0 16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cfd6df;padding:7px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}.status{font-weight:700}.pendente{background:#fee2e2}.validado,.ajustado,.registrado{background:#dcfce7}.validacao{background:#dbeafe}.aguardando{background:#ffedd5}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><thead><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>O que validar / Observação</th><th>Resultado</th><th>Status</th></tr></thead><tbody>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td class="status '+classeStatusImpressao(r.status)+'">'+e(r.status)+'</td></tr>').join('')+'</tbody></table></body></html>');w.document.close();w.focus();setTimeout(()=>{w.print();sucesso('Relatório aberto para salvar como PDF.');},250);}
+function exportarPdfLocal(a){let w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para exportar o PDF.');let titulo='Relatório de Validação DRE — '+fmt(mes);w.document.write('<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+e(titulo)+'</title><style>body{font:12px Arial,sans-serif;color:#172033;padding:28px}h1{margin:0 0 4px;font-size:22px}h2{margin:0 0 18px;font-size:16px}p{margin:0 0 16px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cfd6df;padding:7px;text-align:left;vertical-align:top}th{background:#041a2f;color:#fff}.status{font-weight:700}.pendente{background:#fee2e2}.validado,.ajustado,.registrado{background:#dcfce7}.validacao{background:#dbeafe}.aguardando{background:#ffedd5}</style></head><body><h1>GRUPO SÃO DOMINGO</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><thead><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>O que validar / Observação</th><th>Resultado</th><th>Status</th></tr></thead><tbody>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+richTextHtml(r.observacao,'')+'</td><td>'+richTextHtml(r.resultado,'')+'</td><td class="status '+classeStatusImpressao(r.status)+'">'+e(r.status)+'</td></tr>').join('')+'</tbody></table></body></html>');w.document.close();w.focus();setTimeout(()=>{w.print();sucesso('Relatório aberto para salvar como PDF.');},250);}
 function classeStatusImpressao(s){return s==='PENDENTE'?'pendente':s==='VALIDADO'?'validado':s==='AJUSTADO'?'ajustado':s===''?'registrado':s===''?'aguardando':'validacao';}
-function exportarExcelLocal(a){let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.valor)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('');let htmlExcel='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>O que validar / Observação</th><th>Valor Envolvido</th><th>Resultado da Validação</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',htmlExcel],{type:'application/vnd.ms-excel;charset=utf-8'});let url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download='Relatorio_Validacao_DRE_'+mes+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Arquivo Excel gerado.');}
-function imprimir(){let a=D.registros.filter(r=>r.competencia===mes),w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para imprimir.');w.document.write('<html><head><title>Relatório DRE</title><style>body{font:12px Arial;padding:25px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left}th{background:#eee}</style></head><body><h1>GRUPO SÃO DOMINGOS</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Observação</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.observacao)+'</td><td>'+e(r.resultado)+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.print();}
+function exportarExcelLocal(a){let rows=a.map(r=>'<tr><td>'+e(r.competencia)+'</td><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+e(r.departamento)+'</td><td>'+richTextHtml(r.observacao,'')+'</td><td>'+e(r.valor)+'</td><td>'+richTextHtml(r.resultado,'')+'</td><td>'+e(r.status)+'</td></tr>').join('');let htmlExcel='<!doctype html><html><head><meta charset="utf-8"></head><body><h2>GRUPO SÃO DOMINGO — RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table border="1"><tr><th>Competência</th><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Departamento</th><th>O que validar / Observação</th><th>Valor Envolvido</th><th>Resultado da Validação</th><th>Status</th></tr>'+rows+'</table></body></html>';let blob=new Blob(['\ufeff',htmlExcel],{type:'application/vnd.ms-excel;charset=utf-8'});let url=URL.createObjectURL(blob),aEl=document.createElement('a');aEl.href=url;aEl.download='Relatorio_Validacao_DRE_'+mes+'.xls';document.body.appendChild(aEl);aEl.click();aEl.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);sucesso('Arquivo Excel gerado.');}
+function imprimir(){let a=D.registros.filter(r=>r.competencia===mes),w=window.open('','_blank');if(!w)return erro(null,'Permita pop-ups para imprimir.');w.document.write('<html><head><title>Relatório DRE</title><style>body{font:12px Arial;padding:25px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:6px;text-align:left}th{background:#eee}</style></head><body><h1>GRUPO SÃO DOMINGOS</h1><h2>RELATÓRIO DE VALIDAÇÃO DRE</h2><p>Competência: '+e(fmt(mes))+'</p><table><tr><th>Conta</th><th>Posto(s)</th><th>Tipo</th><th>Observação</th><th>Resultado</th><th>Status</th></tr>'+a.map(r=>'<tr><td>'+e(r.conta)+'</td><td>'+e(r.posto)+'</td><td>'+e(r.tipo)+'</td><td>'+richTextHtml(r.observacao,'')+'</td><td>'+richTextHtml(r.resultado,'')+'</td><td>'+e(r.status)+'</td></tr>').join('')+'</table></body></html>');w.document.close();w.print();}
 function fmt(c){let p=c.split('-'),m=['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];return p.length==2?(m[+p[1]]||p[1])+'/'+p[0]:c;}
 function novoMes(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function e(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
@@ -2959,6 +3212,204 @@ function ea(v){return e(v)}
 function ej(v){return String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
 function sucesso(t){toast.textContent=t;toast.className='toast show';setTimeout(()=>toast.className='toast',3000);}
 function erro(x,p){toast.textContent=p+(x&&x.message?' '+x.message:'');toast.className='toast show error';setTimeout(()=>toast.className='toast',6000);}
+
+/* V16 — editor rico seguro para os campos de observação e resultado. */
+const RICH_ALLOWED_TAGS = new Set(['b','strong','i','em','u','s','strike','del','br','p','div','ul','ol','li']);
+const RICH_DROP_TAGS = new Set(['script','style','iframe','object','svg','math','template','noscript']);
+function sanitizarRichHtml(valor, interpretarEditorHtml=false){
+  const bruto=String(valor??'');
+  if(!bruto.trim()) return '';
+  const pareceHtml=/<\/?[a-z][^>]*>/i.test(bruto);
+  if(!interpretarEditorHtml&&!pareceHtml) return e(bruto).replace(/\r\n?|\n/g,'<br>');
+  const documento=new DOMParser().parseFromString(bruto,'text/html');
+  function limparNo(no){
+    if(no.nodeType===Node.TEXT_NODE) return e(no.nodeValue||'').replace(/\r\n?|\n/g,'<br>');
+    if(no.nodeType!==Node.ELEMENT_NODE) return '';
+    const tag=no.tagName.toLowerCase();
+    if(RICH_DROP_TAGS.has(tag)) return '';
+    if(tag==='br') return '<br>';
+    const filhos=Array.from(no.childNodes).map(limparNo).join('');
+    if(RICH_ALLOWED_TAGS.has(tag)) return `<${tag}>${filhos}</${tag}>`;
+    return filhos;
+  }
+  return Array.from(documento.body.childNodes).map(limparNo).join('').trim();
+}
+function richTextHtml(valor,fallback='-'){
+  const html=sanitizarRichHtml(valor);
+  return html||e(fallback);
+}
+function richTextToPlainText(valor){
+  const html=sanitizarRichHtml(valor);
+  if(!html) return '';
+  const texto=document.createElement('div');
+  texto.innerHTML=html.replace(/<br\s*\/?\s*>/gi,' ').replace(/<\/(?:p|div|li)>/gi,' ');
+  return (texto.textContent||'').replace(/\s+/g,' ').trim();
+}
+function preencherEditorRich(editorId,storageId,valor){
+  const editor=$(editorId),storage=$(storageId);
+  if(!editor||!storage)return;
+  editor.innerHTML=sanitizarRichHtml(valor);
+  storage.value=String(valor??'');
+}
+function sincronizarEditorRich(editorId,storageId){
+  const editor=$(editorId),storage=$(storageId);
+  if(!editor||!storage)return;
+  const texto=(editor.innerText||editor.textContent||'').replace(/\u00a0/g,' ').trim();
+  if(!texto){storage.value='';return;}
+  let html=sanitizarRichHtml(editor.innerHTML,true);
+  if(!/<\/?(?:b|strong|i|em|u|s|strike|del|br|p|div|ul|ol|li)\b/i.test(html))html=`<p>${html}</p>`;
+  storage.value=html;
+}
+function limparEditorRich(editorId,storageId){
+  const editor=$(editorId),storage=$(storageId);
+  if(editor)editor.innerHTML='';
+  if(storage)storage.value='';
+}
+function executarComandoRich(editorId,comando){
+  const editor=$(editorId);
+  if(!editor)return;
+  if(!editor.contains(document.getSelection()?.anchorNode))editor.focus();
+  document.execCommand(comando,false,null);
+  sincronizarEditorRich(editorId,editorId==='obsEditor'?'obs':'resultado');
+}
+function prepararEditoresRich(){
+  [['obsEditor','obs'],['resultadoEditor','resultado']].forEach(([editorId,storageId])=>{
+    const editor=$(editorId);
+    if(!editor)return;
+    editor.addEventListener('input',()=>sincronizarEditorRich(editorId,storageId));
+    editor.addEventListener('keydown',ev=>{
+      if(ev.key==='Enter'){
+        ev.preventDefault();
+        document.execCommand(ev.shiftKey?'insertLineBreak':'insertParagraph',false,null);
+        sincronizarEditorRich(editorId,storageId);
+        return;
+      }
+      if((ev.ctrlKey||ev.metaKey)&&!ev.altKey){
+        const mapa={b:'bold',i:'italic',u:'underline'};
+        const tecla=String(ev.key||'').toLowerCase();
+        const comando=mapa[tecla]||((tecla==='x'&&ev.shiftKey)?'strikeThrough':null);
+        if(comando){ev.preventDefault();executarComandoRich(editorId,comando);}
+      }
+    });
+    editor.addEventListener('paste',ev=>{
+      ev.preventDefault();
+      const texto=(ev.clipboardData||window.clipboardData)?.getData('text/plain')||'';
+      const html=e(texto).replace(/\r\n?|\n/g,'<br>');
+      document.execCommand('insertHTML',false,html);
+      sincronizarEditorRich(editorId,storageId);
+    });
+  });
+}
+prepararEditoresRich();
+
+/* V16 — Análises Gráficas com KPIs calculados a partir dos registros disponíveis. */
+function abrirIndicadores(){
+  document.body.classList.add('dashboard-mode');
+  renderDashboard();
+}
+function voltarOperacoes(){
+  document.body.classList.remove('dashboard-mode');
+  render();
+}
+function duracaoDashboard(ms){
+  if(ms===null||ms===undefined||!Number.isFinite(ms)||ms<0)return '—';
+  const horas=Math.floor(ms/3600000);
+  if(horas<24)return `${horas} h`;
+  const dias=ms/86400000;
+  return `${dias.toLocaleString('pt-BR',{maximumFractionDigits:1})} dias`;
+}
+function classeDashboardStatus(status){
+  if(status==='PENDENTE')return 'pendente';
+  if(status==='EM VALIDAÇÃO')return 'em-validacao';
+  if(status==='VALIDADO')return 'validado';
+  if(status==='AJUSTADO')return 'ajustado';
+  return 'outro';
+}
+function renderDashboard(){
+  const select=$('dashboardCompetencia'),content=$('dashboardContent');
+  if(!select||!content)return;
+  const competenciasDisponiveis=[...new Set(D.registros.map(r=>r.competencia).filter(Boolean))].sort().reverse();
+  const valoresEsperados=['TODAS',...competenciasDisponiveis];
+  const valoresAtuais=[...select.options].map(o=>o.value);
+  if(valoresAtuais.join('|')!==valoresEsperados.join('|')){
+    select.innerHTML='<option value="TODAS">Todas as competências</option>'+competenciasDisponiveis.map(c=>`<option value="${ea(c)}">${e(fmt(c))}</option>`).join('');
+  }
+  const periodoAtual=valoresEsperados.includes(select.value)?select.value:'TODAS';
+  select.value=periodoAtual;
+  const filtrarPerfil=r=>perfilAtual!=='FINANCEIRO'||r.tipo==='Financeiro'||r.tipo==='Validar departamento';
+  const historico=D.registros.filter(filtrarPerfil);
+  const registros=historico.filter(r=>periodoAtual==='TODAS'||r.competencia===periodoAtual);
+  const total=registros.length;
+  const porStatus={};
+  registros.forEach(r=>{const st=r.status||'Sem status';porStatus[st]=(porStatus[st]||0)+1;});
+  const pendencias=registros.filter(r=>r.status==='PENDENTE'||r.status==='EM VALIDAÇÃO');
+  const validados=registros.filter(r=>r.status==='VALIDADO');
+  const ajustados=registros.filter(r=>r.status==='AJUSTADO');
+  const resolvidos=validados.length+ajustados.length;
+  const indiceResolucao=total?Math.round(resolvidos/total*100):0;
+  const taxaAjuste=total?Math.round(ajustados.length/total*100):0;
+  const taxaAberto=total?Math.round(pendencias.length/total*100):0;
+  const agora=Date.now();
+  const pendenciasComIdade=pendencias.map(r=>{
+    const criado=Date.parse(r.criadoEmISO||'');
+    return {r,ms:Number.isFinite(criado)?Math.max(0,agora-criado):null};
+  });
+  const idades=pendenciasComIdade.map(x=>x.ms).filter(x=>x!==null);
+  const mediaIdade=idades.length?idades.reduce((s,x)=>s+x,0)/idades.length:null;
+  const pendenciasMais7=pendenciasComIdade.filter(x=>x.ms!==null&&x.ms>7*86400000).length;
+  const faixas=[
+    {label:'0–2 dias',min:0,max:3*86400000},
+    {label:'3–7 dias',min:3*86400000,max:8*86400000},
+    {label:'8–15 dias',min:8*86400000,max:16*86400000},
+    {label:'16 dias ou mais',min:16*86400000,max:Infinity}
+  ].map(f=>({...f,count:idades.filter(ms=>ms>=f.min&&ms<f.max).length}));
+  const maxFaixa=Math.max(1,...faixas.map(f=>f.count));
+  const statusLabels=[...new Set([...D.status,...Object.keys(porStatus)])];
+  const tipos=Object.entries(registros.reduce((acc,r)=>{const k=r.tipo||'Sem tipo';acc[k]=(acc[k]||0)+1;return acc;},{})).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const maxTipo=Math.max(1,...tipos.map(x=>x[1]));
+  const antigas=pendenciasComIdade.filter(x=>x.ms!==null).sort((a,b)=>b.ms-a.ms).slice(0,7);
+  const statusHtml=statusLabels.map(st=>{
+    const n=porStatus[st]||0,pct=total?Math.round(n/total*100):0;
+    return `<div class="dash-bar-row"><div class="dash-bar-label"><span class="dash-status-dot ${classeDashboardStatus(st)}"></span><span>${e(st)}</span><b>${n} · ${pct}%</b></div><div class="dash-bar-track"><span class="dash-bar-fill ${classeDashboardStatus(st)}" style="width:${pct}%"></span></div></div>`;
+  }).join('');
+  const faixaHtml=faixas.map(f=>{
+    const pct=Math.round(f.count/maxFaixa*100);
+    return `<div class="dash-bar-row"><div class="dash-bar-label"><span>${e(f.label)}</span><b>${f.count}</b></div><div class="dash-bar-track"><span class="dash-bar-fill age" style="width:${pct}%"></span></div></div>`;
+  }).join('');
+  const tiposHtml=tipos.length?tipos.map(([tipo,n])=>`<div class="dash-bar-row"><div class="dash-bar-label"><span>${e(tipo)}</span><b>${n}</b></div><div class="dash-bar-track"><span class="dash-bar-fill tipo" style="width:${Math.round(n/maxTipo*100)}%"></span></div></div>`).join(''):'<p class="dash-empty">Sem registros no período.</p>';
+  const antigasHtml=antigas.length?antigas.map(({r,ms})=>`<tr><td><strong>${e(r.conta||'—')}</strong><small>${e(r.posto||'Sem posto')}</small></td><td><span class="dash-status-pill ${classeDashboardStatus(r.status)}">${e(r.status||'Sem status')}</span></td><td>${e(duracaoDashboard(ms))}</td></tr>`).join(''):'<tr><td colspan="3" class="dash-empty">Não há pendências com data de criação disponível.</td></tr>';
+  const competenciasHistoricas=[...new Set(historico.map(r=>r.competencia).filter(Boolean))].sort().slice(-10);
+  const desempenho=competenciasHistoricas.map(comp=>{
+    const grupo=historico.filter(r=>r.competencia===comp);
+    const concluidos=grupo.filter(r=>r.status==='VALIDADO'||r.status==='AJUSTADO').length;
+    return {comp,total:grupo.length,resolvidos:concluidos,pct:grupo.length?Math.round(concluidos/grupo.length*100):0};
+  });
+  const desempenhoHtml=desempenho.length?desempenho.map(d=>`<div class="dash-bar-row"><div class="dash-bar-label"><span>${e(fmt(d.comp))}</span><b>${d.pct}% · ${d.resolvidos}/${d.total}</b></div><div class="dash-bar-track"><span class="dash-bar-fill resolution" style="width:${d.pct}%"></span></div></div>`).join(''):'<p class="dash-empty">Sem competências disponíveis.</p>';
+  const metaAtingida=indiceResolucao>=90;
+  const metaResolucaoClass=metaAtingida?'':'warning';
+  const periodoLabel=periodoAtual==='TODAS'?'Todas as competências':fmt(periodoAtual);
+  content.innerHTML=`
+    <div class="dash-kpi-grid">
+      <article class="dash-kpi total"><span>Total de registros</span><strong>${total}</strong><small>${e(periodoLabel)}</small></article>
+      <article class="dash-kpi open"><span>Em aberto</span><strong>${pendencias.length}</strong><small>Pendente + Em validação · ${taxaAberto}% do total</small></article>
+      <article class="dash-kpi done"><span>Resolvidos</span><strong>${resolvidos}</strong><small>Validados + Ajustados</small></article>
+      <article class="dash-kpi adjusted"><span>Índice de resolução</span><strong>${indiceResolucao}%</strong><small>Meta sugerida: ≥ 90%</small></article>
+    </div>
+    <div class="dash-secondary-grid">
+      <article class="dash-metric"><div class="dash-metric-icon">◎</div><div><span>Meta sugerida de resolução</span><strong>${indiceResolucao}% <span class="dash-goal-pill ${metaResolucaoClass}">${metaAtingida?'Meta atingida':'Abaixo da meta'}</span></strong><small>Referência inicial: concluir ao menos 90% dos registros do período. A meta pode ser ajustada pela gestão.</small></div></article>
+      <article class="dash-metric"><div class="dash-metric-icon">↻</div><div><span>Taxa de ajustes</span><strong>${taxaAjuste}%</strong><small>${ajustados.length} registro(s) ajustado(s) de ${total}. Indicador para acompanhar reincidência e qualidade da validação.</small></div></article>
+      <article class="dash-metric"><div class="dash-metric-icon">◷</div><div><span>Pendências há mais de 7 dias</span><strong>${pendenciasMais7}</strong><small>${idades.length?`Tempo médio em aberto: ${e(duracaoDashboard(mediaIdade))}.`:'Não há data de criação disponível para calcular a idade.'} Meta sugerida: manter o backlog em aberto em até 10% do total de registros.</small></div></article>
+    </div>
+    <div class="dash-charts-grid">
+      <article class="dash-panel"><div class="dash-panel-heading"><div><h3>Distribuição por status</h3><p>Quantidade e participação de cada etapa.</p></div><span class="dash-panel-tag">${total} registros</span></div><div class="dash-chart-list">${statusHtml||'<p class="dash-empty">Sem dados para exibir.</p>'}</div></article>
+      <article class="dash-panel"><div class="dash-panel-heading"><div><h3>Idade das pendências</h3><p>Tempo desde a criação, apenas registros em aberto.</p></div></div><div class="dash-chart-list">${faixaHtml}</div></article>
+      <article class="dash-panel"><div class="dash-panel-heading"><div><h3>Volume por tipo</h3><p>Principais categorias no período.</p></div></div><div class="dash-chart-list">${tiposHtml}</div></article>
+      <article class="dash-panel"><div class="dash-panel-heading"><div><h3>Índice por competência</h3><p>Percentual em status final por competência registrada.</p></div><span class="dash-panel-tag">Histórico</span></div><div class="dash-chart-list">${desempenhoHtml}</div><div class="dash-legend"><span><i></i> Resolvidos = Validado + Ajustado</span></div></article>
+    </div>
+    <article class="dash-panel dash-oldest"><div class="dash-panel-heading"><div><h3>Pendências mais antigas</h3><p>Priorize os registros que estão há mais tempo sem conclusão.</p></div></div><div class="dash-table-wrap"><table><thead><tr><th>Conta / posto</th><th>Status</th><th>Tempo em aberto</th></tr></thead><tbody>${antigasHtml}</tbody></table></div></article>
+    <div class="dash-data-note"><strong>Como interpretar os indicadores:</strong> o índice de resolução considera <code>VALIDADO</code> e <code>AJUSTADO</code> como status final; as metas de 90% de resolução e até 10% de backlog são sugestões iniciais, não metas corporativas aprovadas. A idade das pendências usa <code>criado_em</code>. O banco atual não registra uma data exclusiva de conclusão nem o responsável por validar, então o tempo real até resolução e o desempenho individual não podem ser calculados com precisão nesta versão. O gráfico por competência usa a competência do registro, não a data em que foi concluído.</div>`;
+}
+
 </script>
 
 <footer class="app-footer">Desenvolvido por Controladoria GSD</footer>
